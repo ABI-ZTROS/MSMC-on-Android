@@ -16,6 +16,11 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -26,12 +31,22 @@ jobs:
       - name: Install android workload
         run: dotnet workload install android
 
-      # 两个 flavor 产物同名，用独立 OutputPath 隔离，避免互相覆盖（obj 共用，顺序构建无冲突）
+      # 装配资产：前端 dist + Termux bootstrap + 内置 4×JDK（internal）
+      - name: Assemble assets (web + termux + jdk)
+        run: |
+          chmod +x scripts/assemble-assets.sh
+          ./scripts/assemble-assets.sh --jdk
+
+      # 两个 flavor 产物同名，用独立 OutputPath 隔离，避免互相覆盖
       - name: Build internal APK
         run: dotnet build src/MSMC.Android/MSMC.Android.csproj -c Release -p:AppFlavor=internal -p:AndroidKeyStore=false -p:OutputPath=bin/Release/internal/
 
       - name: Build external APK
         run: dotnet build src/MSMC.Android/MSMC.Android.csproj -c Release -p:AppFlavor=external -p:AndroidKeyStore=false -p:OutputPath=bin/Release/external/
+
+      # 协议级烟雾测试（WebPanel，无需 root）
+      - name: Run WebPanel smoke test
+        run: dotnet run --project tests/MSMC.Android.Tests -c Release
 
       - name: Upload internal APK
         uses: actions/upload-artifact@v4

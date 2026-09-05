@@ -1,0 +1,64 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Build signed APKs + GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools: latest
+          platforms: 'android-35'
+          build-tools: '35.0.0'
+
+      - name: Install android workload
+        run: dotnet workload install android
+
+      - name: Assemble assets (web + termux + jdk)
+        run: |
+          chmod +x scripts/assemble-assets.sh
+          ./scripts/assemble-assets.sh --jdk
+
+      # 若配置了签名密钥则签名，否则用 debug 证书（不可分发）
+      - name: Build + sign internal APK
+        run: dotnet build src/MSMC.Android/MSMC.Android.csproj -c Release -p:AppFlavor=internal -p:OutputPath=bin/Release/internal/ \
+          -p:AndroidKeyStore=true \
+          -p:AndroidSigningKeyStore=msmc-release.keystore \
+          -p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS || 'msmc' }} \
+          -p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASS || 'changeit' }} \
+          -p:AndroidSigningStorePass=${{ secrets.ANDROID_STORE_PASS || 'changeit' }}
+
+      - name: Build + sign external APK
+        run: dotnet build src/MSMC.Android/MSMC.Android.csproj -c Release -p:AppFlavor=external -p:OutputPath=bin/Release/external/ \
+          -p:AndroidKeyStore=true \
+          -p:AndroidSigningKeyStore=msmc-release.keystore \
+          -p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS || 'msmc' }} \
+          -p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASS || 'changeit' }} \
+          -p:AndroidSigningStorePass=${{ secrets.ANDROID_STORE_PASS || 'changeit' }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            src/MSMC.Android/bin/Release/internal/*-Signed.apk
+            src/MSMC.Android/bin/Release/external/*-Signed.apk
+          generate_release_notes: true
+          draft: true

@@ -29,3 +29,7 @@ Thumbs.db
 AndroidConfig/
 obj/android/
 bin/android/
+
+# CI 装配的内置资产（前端/Termux/JDK，由 scripts/assemble-assets.sh 生成）
+src/MSMC.Android/Assets/
+.jdk/
