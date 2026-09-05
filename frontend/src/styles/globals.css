@@ -1,0 +1,1616 @@
+@import './theme.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 全局动画禁用 —— 当 --md-enable-animations 为 0 时关闭所有动画  */
+/* ═══════════════════════════════════════════════════════════════ */
+:root:has(> * > [style*="--md-enable-animations:0"]),
+:root[style*="--md-enable-animations:0"] {
+  --md-duration-instant: 0ms;
+  --md-duration-fast: 0ms;
+  --md-duration-normal: 0ms;
+  --md-duration-medium: 0ms;
+  --md-duration-slow: 0ms;
+  --md-duration-elastic: 0ms;
+  --md-duration-xlarge: 0ms;
+  --md-duration-cinema: 0ms;
+}
+
+:root[style*="--md-enable-animations:0"] *,
+:root[style*="--md-enable-animations:0"] *::before,
+:root[style*="--md-enable-animations:0"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+@layer base {
+  * {
+    border-color: var(--md-card-subtle-border);
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    font-family: var(--md-font-family);
+    font-size: var(--md-font-size-base);
+    color: var(--md-body);
+    background-color: var(--md-paper);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  input,
+  textarea,
+  select,
+  [contenteditable],
+  .md-terminal,
+  .md-input,
+  .md-textarea,
+  .md-select {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+  }
+
+  ::selection {
+    background-color: var(--md-primary-subtle-background);
+    color: var(--md-body);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--md-body-lighter) 50%, transparent) transparent;
+  }
+
+  *:hover {
+    scrollbar-color: var(--md-body-lighter) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--md-body-lighter) 50%, transparent);
+    border-radius: 4px;
+    transition: background-color var(--md-duration-normal) var(--md-ease-standard),
+      width var(--md-duration-fast) var(--md-ease-standard),
+      height var(--md-duration-fast) var(--md-ease-standard);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--md-body-lighter);
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background: var(--md-body-light);
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+@layer components {
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🃏 Material Design 卡片 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-card {
+    background-color: var(--md-card-background);
+    border: 1px solid var(--md-card-subtle-border);
+    border-radius: var(--md-radius);
+    box-shadow: var(--md-shadow-1);
+    transition: transform var(--md-duration-slow) var(--md-ease-spring-soft),
+      border-color var(--md-duration-normal) var(--md-ease-standard),
+      background-color var(--md-duration-normal) var(--md-ease-standard),
+      box-shadow var(--md-duration-slow) var(--md-ease-aquario);
+  }
+
+  .md-card-hover:hover {
+    transform: translateY(-3px);
+    border-color: var(--md-primary-subtle-border);
+    background-color: var(--md-card-hover);
+    box-shadow: var(--md-shadow-3);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🔘 ColorOS 风格按钮 —— 物理阻尼 + 橡皮筋按压 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 16px;
+    min-height: 32px;
+    font-size: var(--md-font-size-base);
+    font-weight: 500;
+    font-family: var(--md-font-family);
+    border-radius: var(--md-radius);
+    cursor: pointer;
+    border: none;
+    outline: none;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    transition: background-color var(--md-duration-fast) var(--md-ease-standard),
+      color var(--md-duration-fast) var(--md-ease-standard),
+      border-color var(--md-duration-fast) var(--md-ease-standard),
+      transform var(--md-duration-fast) var(--md-ease-spring-soft),
+      box-shadow var(--md-duration-fast) var(--md-ease-standard),
+      filter var(--md-duration-fast) var(--md-ease-standard);
+  }
+
+  /* ColorOS 风格涟漪：从点击位置扩散 */
+  .md-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%),
+      currentColor 0%, transparent 65%);
+    opacity: 0;
+    transform: scale(0.4);
+    transition: opacity 0.5s var(--md-ease-standard), transform 0.5s var(--md-ease-standard);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .md-btn:active::after {
+    opacity: 0.22;
+    transform: scale(2);
+    transition: opacity 0s, transform 0s;
+  }
+
+  .md-btn > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .md-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  .md-btn:active:not(:disabled) {
+    transform: translateY(0.5px) scale(0.96);
+    /* 按下用急停曲线 + 极短时长，释放回弹用 spring-soft（通过 transition 切换实现） */
+    transition-duration: var(--md-duration-instant);
+    transition-timing-function: var(--md-ease-snap);
+  }
+
+  .md-btn:disabled {
+    opacity: var(--md-state-disabled-opacity);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* 实心按钮（Raised）—— ColorOS 14 彩色 tinted shadow */
+  .md-btn-primary {
+    background-color: var(--md-primary-hue-mid);
+    color: var(--md-white);
+    box-shadow: var(--md-shadow-primary);
+  }
+
+  .md-btn-primary:hover:not(:disabled) {
+    background-color: var(--md-primary-hue-dark);
+    box-shadow: 0 12px 28px -6px rgba(59, 130, 246, 0.65),
+                0 6px 14px -3px rgba(59, 130, 246, 0.42);
+  }
+
+  .md-btn-primary:active:not(:disabled) {
+    box-shadow: 0 2px 6px -1px rgba(59, 130, 246, 0.45),
+                0 1px 3px -1px rgba(59, 130, 246, 0.30);
+  }
+
+  /* 危险按钮 */
+  .md-btn-danger {
+    background-color: var(--md-danger);
+    color: var(--md-white);
+    box-shadow: var(--md-shadow-danger);
+  }
+
+  .md-btn-danger:hover:not(:disabled) {
+    filter: brightness(1.08);
+    box-shadow: 0 12px 28px -6px rgba(244, 54, 76, 0.65),
+                0 6px 14px -3px rgba(244, 54, 76, 0.42);
+  }
+
+  .md-btn-danger:active:not(:disabled) {
+    filter: brightness(0.92);
+    box-shadow: 0 2px 6px -1px rgba(244, 54, 76, 0.45),
+                0 1px 3px -1px rgba(244, 54, 76, 0.30);
+  }
+
+  /* 描边按钮（Outlined） */
+  .md-btn-outlined {
+    background-color: transparent;
+    color: var(--md-primary-hue-mid);
+    border: 1px solid var(--md-primary-subtle-border);
+  }
+
+  .md-btn-outlined:hover:not(:disabled) {
+    background-color: var(--md-primary-subtle-background);
+    border-color: var(--md-primary-hue-mid);
+  }
+
+  /* 扁平按钮（Flat） */
+  .md-btn-flat {
+    background-color: transparent;
+    color: var(--md-body);
+    padding: 4px 12px;
+    min-height: 28px;
+  }
+
+  .md-btn-flat:hover:not(:disabled) {
+    background-color: var(--md-card-hover);
+  }
+
+  /* 图标按钮 */
+  .md-btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: var(--md-radius-small);
+  }
+
+  .md-btn-icon-lg {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: var(--md-radius-small);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 📝 Material Design 输入框（Outlined） */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-input {
+    width: 100%;
+    height: 36px;
+    padding: 0 12px;
+    font-size: var(--md-font-size-base);
+    font-family: var(--md-font-family);
+    color: var(--md-body);
+    background-color: transparent;
+    border: 1px solid var(--md-subtle-border);
+    border-radius: var(--md-radius-small);
+    outline: none;
+    transition: border-color var(--md-duration-fast) var(--md-ease-standard);
+  }
+
+  .md-input:hover {
+    border-color: var(--md-body-light);
+  }
+
+  .md-input:focus {
+    border-color: var(--md-primary-hue-mid);
+    border-width: 2px;
+    padding: 0 11px;
+    /* ColorOS 焦点 ring：主色 2px halo */
+    box-shadow: var(--md-ring-focus);
+  }
+
+  .md-input::placeholder {
+    color: var(--md-body-lighter);
+    opacity: 0.7;
+  }
+
+  .md-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: var(--md-font-size-base);
+    font-family: var(--md-font-family);
+    color: var(--md-body);
+    background-color: transparent;
+    border: 1px solid var(--md-subtle-border);
+    border-radius: var(--md-radius-small);
+    outline: none;
+    resize: vertical;
+    transition: border-color var(--md-duration-fast) var(--md-ease-standard);
+  }
+
+  .md-textarea:hover {
+    border-color: var(--md-body-light);
+  }
+
+  .md-textarea:focus {
+    border-color: var(--md-primary-hue-mid);
+    border-width: 2px;
+    padding: 9px 11px;
+    box-shadow: var(--md-ring-focus);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 📑 Material Design Tab */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--md-subtle-border);
+  }
+
+  /* ColorOS Tab：指示器用弹簧滑动（4% 过冲），文字色用 aquario 平滑过渡 */
+  .md-tab {
+    padding: 10px 16px;
+    font-size: var(--md-font-size-base);
+    font-weight: 500;
+    color: var(--md-body-light);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color var(--md-duration-medium) var(--md-ease-aquario),
+      border-color var(--md-duration-elastic) var(--md-ease-spring-soft),
+      background-color var(--md-duration-fast) var(--md-ease-aquario);
+  }
+
+  .md-tab:hover {
+    color: var(--md-body);
+    background-color: var(--md-state-hover);
+  }
+
+  .md-tab-active {
+    color: var(--md-primary-hue-mid);
+    border-bottom-color: var(--md-primary-hue-mid);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 📦 Expander 可折叠分组 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-expander {
+    border-radius: var(--md-radius-small);
+    overflow: hidden;
+  }
+
+  .md-expander-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color var(--md-duration-fast) var(--md-ease-standard);
+  }
+
+  .md-expander-header:hover {
+    background-color: var(--md-card-hover);
+  }
+
+  .md-expander-icon {
+    width: 12px;
+    height: 12px;
+    transition: transform var(--md-duration-normal) var(--md-ease-standard);
+  }
+
+  .md-expander-icon-expanded {
+    transform: rotate(90deg);
+  }
+
+  .md-expander-content {
+    overflow: hidden;
+    transition: max-height var(--md-duration-medium) var(--md-ease-standard);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🧭 导航项（侧边栏）—— ColorOS 风格物理阻尼动效 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-sidebar-transition {
+    transition: width var(--md-duration-medium) var(--md-ease-emphasized);
+  }
+
+  .md-sidebar-text-transition {
+    transition: opacity var(--md-duration-normal) var(--md-ease-standard),
+      width var(--md-duration-medium) var(--md-ease-emphasized);
+  }
+
+  .md-sidebar-footer {
+    transition: transform var(--md-duration-normal) var(--md-ease-spring-soft);
+  }
+
+  .md-sidebar-footer:hover {
+    transform: translateY(-1px);
+  }
+
+  .md-nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    margin: 3px 2px;
+    font-size: var(--md-font-size-base);
+    font-weight: 500;
+    color: var(--md-body);
+    border-radius: var(--md-radius);
+    cursor: pointer;
+    user-select: none;
+    /* 多通道并行：背景色 + transform 走不同曲线（ColorOS Aquario 风格） */
+    transition: background-color var(--md-duration-fast) var(--md-ease-aquario),
+      transform var(--md-duration-medium) var(--md-ease-spring-soft),
+      box-shadow var(--md-duration-normal) var(--md-ease-standard);
+  }
+
+  .md-nav-icon {
+    transition: transform var(--md-duration-normal) var(--md-ease-spring),
+      color var(--md-duration-fast) var(--md-ease-standard);
+  }
+
+  .md-nav-item:hover .md-nav-icon {
+    transform: scale(1.15);
+  }
+
+  .md-nav-icon-active {
+    color: var(--md-nav-item-selected);
+  }
+
+  .md-nav-chevron {
+    animation: mdNavChevronSlide var(--md-duration-normal) var(--md-ease-spring-soft);
+  }
+
+  @keyframes mdNavChevronSlide {
+    0% {
+      opacity: 0;
+      transform: translateX(-8px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* ColorOS 激活指示器：从顶部弹簧滑入，带过冲 */
+  .md-nav-item::before {
+    content: '';
+    position: absolute;
+    left: -2px;
+    top: 50%;
+    transform: translateY(-50%) scaleY(0);
+    width: 3px;
+    border-radius: 2px;
+    background: var(--md-accent-gradient);
+    box-shadow: 0 0 8px var(--md-nav-item-selected-indicator);
+    opacity: 0;
+    transition: opacity var(--md-duration-medium) var(--md-ease-aquario),
+      transform var(--md-duration-elastic) var(--md-ease-spring-soft);
+    transform-origin: center;
+  }
+
+  /* hover：X 轴 2px 推挤（ColorOS 风格的"被推一下"）—— 仅展开态 */
+  .md-nav-item:hover {
+    background-color: var(--md-state-hover);
+    transform: translateX(2px);
+  }
+
+  .md-nav-item-active {
+    background-color: var(--md-state-selected);
+  }
+
+  .md-nav-item-active::before {
+    opacity: 1;
+    transform: translateY(-50%) scaleY(1);
+  }
+
+  .md-nav-item-active:hover {
+    background-color: var(--md-state-selected);
+    transform: translateX(2px);
+  }
+
+  /* ─── Sidebar 折叠态：禁用 X 轴推挤，改为轻微 scale（避免破坏居中） ─── */
+  .md-sidebar-collapsed .md-nav-item:hover {
+    transform: scale(1.04);
+  }
+  .md-sidebar-collapsed .md-nav-item-active:hover {
+    transform: scale(1.04);
+  }
+  /* 折叠态：左侧竖条指示器改为底部居中发光小圆点（更符合磁吸居中美学） */
+  .md-sidebar-collapsed .md-nav-item::before {
+    left: 50%;
+    top: auto;
+    bottom: 2px;
+    transform: translateX(-50%) scaleY(0) scaleX(0);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+  }
+  .md-sidebar-collapsed .md-nav-item-active::before {
+    opacity: 1;
+    transform: translateX(-50%) scaleY(1) scaleX(1);
+  }
+
+  /* nav-item 按下急停反馈 */
+  .md-nav-item:active {
+    transform: scale(0.97);
+    transition-duration: var(--md-duration-instant);
+    transition-timing-function: var(--md-ease-snap);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🔴 状态点 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .md-status-dot-green {
+    background-color: var(--md-gauge-green);
+  }
+
+  .md-status-dot-yellow {
+    background-color: var(--md-gauge-yellow);
+  }
+
+  .md-status-dot-red {
+    background-color: var(--md-gauge-red);
+  }
+
+  .md-status-dot-gray {
+    background-color: var(--md-body-lighter);
+  }
+
+  .md-status-dot-blue {
+    background-color: var(--md-primary-hue-mid);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🏷️ 徽章 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1px 6px;
+    font-size: var(--md-font-size-xs);
+    font-weight: 700;
+    color: var(--md-white);
+    background: var(--md-accent-gradient);
+    border-radius: var(--md-radius-small);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 📄 页面入场动画 —— ColorOS Aquario：位移 + 缩放 + 模糊消散三通道并行 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-page-enter {
+    animation: mdPageEnter var(--md-duration-elastic) var(--md-ease-spring-soft) both;
+  }
+
+  @keyframes mdPageEnter {
+    0% {
+      opacity: 0;
+      transform: translateY(16px) scale(0.985);
+      filter: blur(6px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+  }
+
+  /* 页面退场：模糊消散 + 缩放 + 透明度衰减（旧页专用） */
+  .md-page-exit {
+    animation: mdPageExit calc(var(--md-duration-elastic) * 0.8) var(--md-ease-aquario) both;
+    pointer-events: none;
+  }
+
+  @keyframes mdPageExit {
+    0% {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+      filter: blur(0) brightness(1);
+    }
+    100% {
+      opacity: var(--md-opacity-exit);
+      transform: translateX(-24%) scale(var(--md-scale-exit));
+      filter: blur(var(--md-blur-exit)) brightness(var(--md-brightness-exit));
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 📋 交错列表入场 —— ColorOS 公式：min(i*40ms, 320ms) * (1 - 0.05i) */
+  /* 用法：<div className="md-stagger-item" style={{ '--md-stagger-i': 0 }}>...</div> */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-stagger-item {
+    /* 不在元素自身设 opacity:0 —— 之前依赖 animation forwards 才变可见，
+       一旦动画因 WebView2 渲染时序 / lazy chunk 延迟挂载错过触发窗口，
+       元素会永久 opacity:0（侧边栏按钮"蒸发"、页面卡片空白）。
+       改为 both：动画开始前应用 0%（无闪烁渐入），动画失效时 fill-mode
+       不生效、元素默认 opacity:1 可见，可见性不再依赖动画是否执行。 */
+    animation: mdStaggerIn var(--md-duration-elastic) var(--md-ease-spring-soft) both;
+    animation-delay: calc(
+      min(var(--md-stagger-i, 0) * 40ms, 320ms) *
+      (1 - 0.05 * var(--md-stagger-i, 0))
+    );
+  }
+
+  @keyframes mdStaggerIn {
+    0% {
+      opacity: 0;
+      transform: translateY(16px) scale(0.97);
+      filter: blur(3px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🔴 状态点脉冲动画 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-status-pulse {
+    animation: mdStatusPulse 2s var(--md-ease-standard) infinite;
+  }
+
+  @keyframes mdStatusPulse {
+    0%, 100% {
+      opacity: 1;
+      box-shadow: 0 0 0 0 currentColor;
+    }
+    50% {
+      opacity: 0.7;
+      box-shadow: 0 0 0 4px transparent;
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* ✨ 骨架屏 Shimmer 动画 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--md-card-hover) 0%,
+      color-mix(in srgb, var(--md-card-hover) 60%, var(--md-card-background)) 50%,
+      var(--md-card-hover) 100%
+    );
+    background-size: 200% 100%;
+    animation: mdShimmer 1.5s linear infinite;
+  }
+
+  @keyframes mdShimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🪟 弹窗退场动画 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-modal-backdrop-leave {
+    animation: mdFadeOut var(--md-duration-fast) var(--md-ease-standard-accelerate) forwards;
+  }
+
+  .md-modal-leave {
+    animation: mdModalOut var(--md-duration-fast) var(--md-ease-standard-accelerate) forwards;
+  }
+
+  @keyframes mdFadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes mdModalOut {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🌀 旋转动画（加载/刷新图标） */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-spin {
+    animation: mdSpin 1s linear infinite;
+  }
+
+  @keyframes mdSpin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🪟 弹窗动画 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  @keyframes mdFadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes mdModalIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🎨 色板按钮（设置页颜色选择器） */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-swatch {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--md-radius);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform var(--md-duration-fast) var(--md-ease-standard),
+      border-color var(--md-duration-fast) var(--md-ease-standard);
+  }
+
+  .md-swatch:hover {
+    border-color: var(--md-swatch-hover-border);
+    transform: scale(1.05);
+  }
+
+  .md-swatch:active {
+    transform: scale(0.9);
+  }
+
+  .md-swatch-selected {
+    border-color: var(--md-swatch-hover-border);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 💻 终端/日志区域 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-terminal {
+    background-color: var(--md-terminal-background);
+    border-radius: var(--md-radius-small);
+    padding: 8px 12px;
+    font-family: var(--md-font-mono);
+    font-size: var(--md-font-size-sm);
+    color: var(--md-success-foreground);
+    line-height: 1.6;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 分隔线 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-divider {
+    height: 1px;
+    background-color: var(--md-subtle-border);
+  }
+
+  .md-divider-vertical {
+    width: 1px;
+    background-color: var(--md-subtle-border);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 标题样式 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-section-title {
+    font-size: var(--md-font-size-lg);
+    font-weight: 700;
+    color: var(--md-body);
+    margin-bottom: 12px;
+  }
+
+  .md-subsection-title {
+    font-size: var(--md-font-size-sm);
+    font-weight: 600;
+    color: var(--md-body-light);
+    opacity: 0.7;
+    margin: 8px 4px 4px 4px;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🔀 Toggle 开关 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-toggle {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+
+  .md-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .md-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: var(--md-subtle-border);
+    border-radius: var(--md-radius-pill);
+    transition: background-color var(--md-duration-medium) var(--md-ease-aquario);
+  }
+
+  .md-toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--md-white);
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    /* ColorOS 阻尼振荡曲线，圆形滑块滑动时带轻微回弹 */
+    transition: transform var(--md-duration-elastic) var(--md-ease-oscillate);
+  }
+
+  .md-toggle input:checked + .md-toggle-slider {
+    background-color: var(--md-primary-hue-mid);
+  }
+
+  .md-toggle input:checked + .md-toggle-slider::before {
+    transform: translateX(18px);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 📊 数据表格 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--md-font-size-base);
+  }
+
+  .md-data-table thead th {
+    text-align: left;
+    padding: 8px 12px;
+    font-weight: 600;
+    color: var(--md-body-light);
+    border-bottom: 1px solid var(--md-subtle-border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    background-color: var(--md-card-background);
+    z-index: 1;
+  }
+
+  .md-data-table tbody td {
+    padding: 6px 12px;
+    color: var(--md-body);
+    border-bottom: 1px solid var(--md-card-subtle-border);
+  }
+
+  .md-data-table tbody tr {
+    transition: background-color var(--md-duration-fast) var(--md-ease-standard);
+  }
+
+  .md-data-table tbody tr:hover {
+    background-color: var(--md-card-hover);
+  }
+
+  .md-data-table tbody tr.md-row-selected {
+    background-color: var(--md-primary-subtle-background);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🌳 树形视图 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-tree-item {
+    user-select: none;
+  }
+
+  .md-tree-item-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: var(--md-radius-small);
+    cursor: pointer;
+    transition: background-color var(--md-duration-fast) var(--md-ease-standard);
+  }
+
+  .md-tree-item-header:hover {
+    background-color: var(--md-card-hover);
+  }
+
+  .md-tree-item-selected {
+    background-color: var(--md-primary-subtle-background);
+  }
+
+  .md-tree-item-children {
+    margin-left: 16px;
+    overflow: hidden;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 📉 下拉选择框 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-select {
+    width: 100%;
+    height: 36px;
+    padding: 0 32px 0 12px;
+    font-size: var(--md-font-size-base);
+    font-family: var(--md-font-family);
+    color: var(--md-body);
+    background-color: transparent;
+    border: 1px solid var(--md-subtle-border);
+    border-radius: var(--md-radius-small);
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    background-image: linear-gradient(var(--md-body-light), var(--md-body-light));
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px 12px;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: right 10px center;
+    mask-position: right 10px center;
+    -webkit-mask-size: 12px 12px;
+    mask-size: 12px 12px;
+    transition: border-color var(--md-duration-fast) var(--md-ease-standard);
+  }
+
+  .md-select:hover {
+    border-color: var(--md-body-light);
+  }
+
+  .md-select:focus {
+    border-color: var(--md-primary-hue-mid);
+    border-width: 2px;
+    padding: 0 31px 0 11px;
+  }
+
+  .md-select option {
+    background-color: var(--md-card-background);
+    color: var(--md-body);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 📊 进度条 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-progress {
+    width: 100%;
+    height: 4px;
+    background-color: var(--md-card-hover);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .md-progress-bar {
+    height: 100%;
+    background-color: var(--md-primary-hue-mid);
+    border-radius: 2px;
+    transition: width var(--md-duration-medium) var(--md-ease-standard);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🏷️ Chip 标签 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    font-size: var(--md-font-size-xs);
+    font-weight: 600;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+
+  .md-chip-primary {
+    color: var(--md-primary-hue-light);
+    background-color: var(--md-primary-subtle-background);
+  }
+
+  .md-chip-success {
+    color: var(--md-gauge-green);
+    background-color: var(--md-success-subtle-background);
+  }
+
+  .md-chip-warning {
+    color: var(--md-gauge-yellow);
+    background-color: var(--md-warning-subtle-background);
+  }
+
+  .md-chip-danger {
+    color: var(--md-gauge-red);
+    background-color: var(--md-danger-subtle-background);
+  }
+
+  .md-chip-neutral {
+    color: var(--md-body-light);
+    background-color: var(--md-card-hover);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🔢 统计卡片 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-stat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px;
+    background-color: var(--md-card-background);
+    border: 1px solid var(--md-card-subtle-border);
+    border-radius: var(--md-radius-large);
+    box-shadow: var(--md-shadow-1);
+    transition: transform var(--md-duration-slow) var(--md-ease-spring-soft),
+      border-color var(--md-duration-normal) var(--md-ease-aquario),
+      box-shadow var(--md-duration-slow) var(--md-ease-aquario);
+  }
+
+  .md-stat-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--md-primary-subtle-border);
+    box-shadow: var(--md-shadow-3);
+  }
+
+  .md-stat-label {
+    font-size: var(--md-font-size-sm);
+    color: var(--md-body-light);
+    font-weight: 500;
+  }
+
+  .md-stat-value {
+    font-size: var(--md-font-size-2xl);
+    font-weight: 700;
+    color: var(--md-body);
+    line-height: 1.2;
+  }
+
+  .md-stat-unit {
+    font-size: var(--md-font-size-sm);
+    color: var(--md-body-light);
+    font-weight: 400;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 📋 空状态 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 48px 24px;
+    color: var(--md-body-lighter);
+    text-align: center;
+  }
+
+  .md-empty-state-icon {
+    font-size: 48px;
+    opacity: 0.4;
+  }
+
+  .md-empty-state-text {
+    font-size: var(--md-font-size-md);
+    font-weight: 500;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🔗 链接按钮 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-link {
+    color: var(--md-primary-hue-light);
+    cursor: pointer;
+    text-decoration: none;
+    transition: color var(--md-duration-fast) var(--md-ease-standard);
+  }
+
+  .md-link:hover {
+    color: var(--md-primary-hue-lighter);
+    text-decoration: underline;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    background: var(--md-accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-gradient-accent {
+    background: var(--md-accent-gradient);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* ✨ 优质动效工具类                                            */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  /* 弹簧缓动曲线（Material 3 emphasized + 自定义弹簧） */
+  .md-ease-spring {
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .md-ease-spring-soft {
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* 微交互：按钮/卡片按下回弹 —— ColorOS 双阶段物理模型 */
+  /* 按下走 snap 急停（80ms），释放回弹走 spring-soft（350ms） */
+  .md-press {
+    transition: transform var(--md-duration-slow) var(--md-ease-spring-soft),
+      box-shadow var(--md-duration-normal) var(--md-ease-aquario),
+      background-color var(--md-duration-fast) var(--md-ease-aquario);
+  }
+
+  .md-press:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  .md-press:active:not(:disabled) {
+    transform: scale(0.97) translateY(0.5px);
+    transition-duration: var(--md-duration-instant);
+    transition-timing-function: var(--md-ease-snap);
+  }
+
+  /* ColorOS 涟漪：圆形扩散不溢出元素边界（用 clip-path 限制圆角） */
+  .md-ripple {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .md-ripple::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    left: var(--ripple-x, 50%);
+    top: var(--ripple-y, 50%);
+    translate: -50% -50%;
+    scale: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, currentColor 0%, transparent 70%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+    /* 按住不淡出（ColorOS 风格），释放后 400ms 淡出 */
+    transition: scale var(--md-duration-elastic) var(--md-ease-aquario),
+      opacity var(--md-duration-medium) var(--md-ease-standard) var(--md-duration-medium);
+  }
+
+  .md-ripple:active::after {
+    /* JS 通过 useRipple 设置 --ripple-scale（按元素对角线/8 计算） */
+    scale: var(--ripple-scale, 18);
+    opacity: 0.18;
+    transition: scale var(--md-duration-elastic) var(--md-ease-aquario),
+      opacity 0s;
+  }
+
+  /* 玻璃态卡片（用于关键面板，配合粒子背景） */
+  .md-glass {
+    background: color-mix(in srgb, var(--md-card-background) 72%, transparent);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border: 1px solid color-mix(in srgb, var(--md-card-subtle-border) 80%, transparent);
+  }
+
+  /* 主色辉光（用于强调元素） */
+  .md-glow-primary {
+    box-shadow: 0 0 0 1px var(--md-primary-subtle-border),
+      0 0 24px -8px var(--md-primary-hue-mid);
+  }
+
+  /* 品牌脉冲（logo / 状态指示） */
+  .md-brand-pulse {
+    animation: mdBrandPulse 3s var(--md-ease-standard) infinite;
+  }
+
+  @keyframes mdBrandPulse {
+    0%, 100% {
+      opacity: 1;
+      filter: drop-shadow(0 0 0px var(--md-primary-hue-mid));
+    }
+    50% {
+      opacity: 0.85;
+      filter: drop-shadow(0 0 8px var(--md-primary-hue-mid));
+    }
+  }
+
+  /* 数字滚动入场（用于统计数值） */
+  .md-num-enter {
+    animation: mdNumEnter 0.5s var(--md-ease-spring) both;
+  }
+
+  /* 轻量淡入（用于加载提示等小元素） */
+  .md-fade-in {
+    animation: mdFadeIn 0.3s var(--md-ease-standard) both;
+  }
+
+  @keyframes mdFadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(2px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes mdNumEnter {
+    0% {
+      opacity: 0;
+      transform: translateY(8px) scale(0.92);
+      filter: blur(2px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+  }
+
+  /* 高亮闪烁（数据更新时） */
+  .md-flash {
+    animation: mdFlash 0.8s var(--md-ease-standard);
+  }
+
+  @keyframes mdFlash {
+    0% {
+      background-color: var(--md-primary-subtle-background);
+    }
+    100% {
+      background-color: transparent;
+    }
+  }
+
+  /* 轨道旋转（加载品牌环） */
+  .md-orbit {
+    animation: mdOrbit 8s linear infinite;
+  }
+
+  @keyframes mdOrbit {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* 反向轨道 */
+  .md-orbit-reverse {
+    animation: mdOrbit 12s linear infinite reverse;
+  }
+
+  /* 呼吸（柔和的明暗循环） */
+  .md-breathe {
+    animation: mdBreathe 4s var(--md-ease-standard) infinite;
+  }
+
+  @keyframes mdBreathe {
+    0%, 100% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  /* 渐变流动（用于进度条/装饰线） */
+  .md-flow {
+    background-size: 200% 100%;
+    animation: mdFlow 3s linear infinite;
+  }
+
+  @keyframes mdFlow {
+    0% {
+      background-position: 0% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  /* 顶部扫描线（用于监控页面强调） */
+  .md-scanline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(90deg,
+      transparent,
+      var(--md-primary-hue-mid) 50%,
+      transparent);
+    opacity: 0.5;
+    animation: mdScanline 4s var(--md-ease-standard) infinite;
+  }
+
+  @keyframes mdScanline {
+    0% {
+      transform: translateY(0);
+      opacity: 0;
+    }
+    20% {
+      opacity: 0.6;
+    }
+    80% {
+      opacity: 0.6;
+    }
+    100% {
+      transform: translateY(var(--scan-distance, 100px));
+      opacity: 0;
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 💥 崩溃页专属动画 —— "原地爆炸" ColorOS 美学                  */
+  /* 即使崩溃也要带着 ColorOS 的美观而原地爆炸                      */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  /* 开场冲击震动：模拟爆炸冲击波传导至机身（一次性，600ms） */
+  .md-crash-shake {
+    animation: mdCrashShake 600ms var(--md-ease-snap) both;
+  }
+
+  @keyframes mdCrashShake {
+    0% {
+      transform: translate(0, 0);
+    }
+    10% {
+      transform: translate(-4px, 2px);
+    }
+    20% {
+      transform: translate(5px, -3px);
+    }
+    30% {
+      transform: translate(-3px, 4px);
+    }
+    40% {
+      transform: translate(4px, -2px);
+    }
+    50% {
+      transform: translate(-2px, 3px);
+    }
+    65% {
+      transform: translate(2px, -1px);
+    }
+    80% {
+      transform: translate(-1px, 1px);
+    }
+    100% {
+      transform: translate(0, 0);
+    }
+  }
+
+  /* 爆炸冲击波光环：从警告图标中心向外扩散消散（一次性，900ms） */
+  .md-crash-shockwave {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    animation: mdCrashShockwave 900ms var(--md-ease-aquario) both;
+  }
+
+  @keyframes mdCrashShockwave {
+    0% {
+      box-shadow: 0 0 0 0 rgba(244, 54, 76, 0.55),
+        0 0 0 0 rgba(244, 54, 76, 0.35);
+      opacity: 1;
+    }
+    100% {
+      box-shadow: 0 0 0 48px rgba(244, 54, 76, 0),
+        0 0 0 96px rgba(244, 54, 76, 0);
+      opacity: 0;
+    }
+  }
+
+  /* 警告图标脉冲：红色光晕呼吸（无限循环，2.4s） */
+  .md-alert-pulse {
+    animation: mdAlertPulse 2.4s var(--md-ease-standard) infinite;
+  }
+
+  @keyframes mdAlertPulse {
+    0%, 100% {
+      filter: drop-shadow(0 0 0px rgba(244, 54, 76, 0.6));
+    }
+    50% {
+      filter: drop-shadow(0 0 14px rgba(244, 54, 76, 0.85));
+    }
+  }
+
+  /* 警告图标外圈扩散 ring（无限循环，2.4s，与 pulse 同步） */
+  .md-alert-ring::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 2px solid rgba(244, 54, 76, 0.6);
+    animation: mdAlertRing 2.4s var(--md-ease-aquario) infinite;
+    pointer-events: none;
+  }
+
+  @keyframes mdAlertRing {
+    0% {
+      transform: scale(1);
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(1.8);
+      opacity: 0;
+    }
+  }
+
+  /* 错误文字故障闪烁：极微妙的色偏 + 抖动（无限循环，3.6s） */
+  .md-error-flicker {
+    animation: mdErrorFlicker 3.6s var(--md-ease-standard) infinite;
+  }
+
+  @keyframes mdErrorFlicker {
+    0%, 92%, 100% {
+      opacity: 1;
+      transform: translate(0, 0);
+      text-shadow: 0 0 12px rgba(244, 54, 76, 0.4);
+    }
+    93% {
+      opacity: 0.85;
+      transform: translate(-1px, 0);
+      text-shadow: 1px 0 0 rgba(0, 194, 168, 0.6), -1px 0 0 rgba(244, 54, 76, 0.7);
+    }
+    94% {
+      opacity: 1;
+      transform: translate(1px, 0);
+    }
+    95% {
+      opacity: 0.9;
+      transform: translate(0, 0);
+      text-shadow: -1px 0 0 rgba(0, 194, 168, 0.5), 1px 0 0 rgba(244, 54, 76, 0.6);
+    }
+    96% {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+  }
+
+  /* prefers-reduced-motion 全局降级 */
+  @media (prefers-reduced-motion: reduce) {
+    .md-brand-pulse,
+    .md-num-enter,
+    .md-flash,
+    .md-orbit,
+    .md-orbit-reverse,
+    .md-breathe,
+    .md-flow,
+    .md-scanline::before,
+    .md-skeleton,
+    .md-status-pulse,
+    .md-spin,
+    .md-page-enter,
+    .md-stagger-item,
+    .md-crash-shake,
+    .md-crash-shockwave,
+    .md-alert-pulse,
+    .md-alert-ring::before,
+    .md-error-flicker {
+      animation: none !important;
+    }
+
+    .md-press:hover:not(:disabled),
+    .md-press:active:not(:disabled) {
+      transform: none !important;
+    }
+  }
+}
+
+@layer components {
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🎯 ColorOS 风格增强卡片 —— 柔和长衰减阴影 + 弹簧悬浮 */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-card-elevated {
+    background-color: var(--md-card-background);
+    border: 1px solid var(--md-card-subtle-border);
+    border-radius: var(--md-radius-large);
+    box-shadow: var(--md-shadow-2), var(--md-edge-hairline);
+    transition: transform var(--md-duration-slow) var(--md-ease-spring-soft),
+      border-color var(--md-duration-normal) var(--md-ease-aquario),
+      box-shadow var(--md-duration-slow) var(--md-ease-aquario),
+      background-color var(--md-duration-normal) var(--md-ease-aquario);
+  }
+
+  .md-card-elevated:hover {
+    transform: translateY(-4px);
+    border-color: var(--md-primary-subtle-border);
+    box-shadow: var(--md-shadow-modal), var(--md-edge-hairline);
+  }
+
+  /* ColorOS 按压模型：按下陷落感 */
+  .md-card-elevated:active {
+    transform: translateY(-1px) scale(0.99);
+    transition-duration: var(--md-duration-instant);
+    transition-timing-function: var(--md-ease-snap);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🔄 轨道旋转动画（加载指示器） */
+  /* ═══════════════════════════════════════════════════════════════ */
+  .md-orbit {
+    animation: mdOrbit 1.4s linear infinite;
+  }
+
+  .md-orbit-reverse {
+    animation: mdOrbitReverse 1.8s linear infinite;
+  }
+
+  @keyframes mdOrbit {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes mdOrbitReverse {
+    from {
+      transform: rotate(360deg);
+    }
+    to {
+      transform: rotate(0deg);
+    }
+  }
+
+  /* 流光进度条 */
+  .md-flow {
+    animation: mdFlow 1.6s var(--md-ease-standard) infinite;
+  }
+
+  @keyframes mdFlow {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(350%);
+    }
+  }
+}
+

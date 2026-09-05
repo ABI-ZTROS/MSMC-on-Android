@@ -1,0 +1,31 @@
+# .NET
+bin/
+obj/
+artifacts/
+*.user
+*.suo
+
+# 前端
+frontend/node_modules/
+frontend/dist/
+
+# 日志/运行时数据
+*.log
+logs/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Android
+*.apk
+*.aab
+*.keystore
+AndroidConfig/
+obj/android/
+bin/android/

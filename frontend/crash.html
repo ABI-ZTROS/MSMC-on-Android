@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MSMC 灾难性故障</title>
+    <style>
+      html, body {
+        margin: 0; padding: 0; height: 100%;
+        background-color: var(--md-paper, #0a0f1e);
+        -webkit-user-select: none; user-select: none;
+      }
+      body {
+        font-family: var(--md-font-family, "Segoe UI", "Microsoft YaHei UI", system-ui, sans-serif);
+        color: var(--md-body, #e2e8f0);
+        overflow: hidden;
+      }
+      #root { height: 100%; }
+      #boot-diagnostics {
+        position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+        background-color: var(--md-paper, #0a0f1e); color: var(--md-body, #e2e8f0);
+        padding: 24px; z-index: 9999; font-size: 13px; line-height: 1.6;
+      }
+      #boot-diagnostics .box {
+        max-width: 560px; width: 100%;
+        background: var(--md-card-background, #0f172a);
+        border: 1px solid var(--md-card-subtle-border, rgba(30,41,59,0.2));
+        border-left: 3px solid var(--md-gauge-red, #F4364C);
+        border-radius: var(--md-radius-large, 16px);
+        padding: 20px;
+        box-shadow: 0 6px 16px rgba(244, 54, 76, 0.18);
+      }
+      #boot-diagnostics h2 {
+        margin: 0 0 8px; font-size: 14px;
+        color: var(--md-error-text, #f87171); font-weight: 600;
+      }
+      #boot-diagnostics .log {
+        margin-top: 12px; padding: 10px;
+        background: var(--md-deep-background, #020617);
+        border-radius: var(--md-radius-small, 8px);
+        font-family: var(--md-font-mono, Consolas, monospace);
+        font-size: 11px; color: var(--md-body-light, #94a3b8);
+        max-height: 200px; overflow: auto; white-space: pre-wrap; word-break: break-all;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <div id="boot-diagnostics">
+      <div class="box">
+        <h2>MSMC 灾难性故障页加载中...</h2>
+        <div class="log" id="boot-log">[BOOT] 正在加载故障页面...</div>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var bootLog = document.getElementById('boot-log');
+        function appendLog(msg) {
+          if (bootLog) {
+            var line = '[' + new Date().toLocaleTimeString() + '] ' + msg + '\n';
+            bootLog.textContent += line;
+          }
+        }
+        window.addEventListener('error', function (e) {
+          var msg = (e.message || '未知错误') + (e.filename ? ' @ ' + e.filename + ':' + (e.lineno || 0) : '');
+          appendLog('[ERROR] ' + msg);
+        });
+        appendLog('[BOOT] 故障页诊断脚本已就绪');
+      })();
+    </script>
+    <script type="module" src="/src/crash.tsx"></script>
+  </body>
+</html>

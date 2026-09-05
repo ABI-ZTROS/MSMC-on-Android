@@ -1,0 +1,204 @@
+:root {
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* 🎨 Material Design 主题变量 —— 与 WPF AppResources.xaml 一一对应 */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  /* ─── 背景色 ─── */
+  --md-paper: #0a0f1e;
+  --md-deep-background: #020617;
+  --md-card-background: #0F172A;
+  --md-card-hover: #1E293B;
+  --md-terminal-background: #0C1222;
+  --md-loading-overlay: rgba(15, 23, 42, 0.8);
+
+  /* ─── 主色 9 级色阶（苍穹蓝） ─── */
+  --md-primary-50: #EFF6FF;
+  --md-primary-100: #DBEAFE;
+  --md-primary-200: #BFDBFE;
+  --md-primary-300: #93C5FD;
+  --md-primary-400: #60A5FA;
+  --md-primary-500: #3B82F6;
+  --md-primary-600: #2563EB;
+  --md-primary-700: #1D4ED8;
+  --md-primary-800: #1E40AF;
+  --md-primary-900: #1E3A8A;
+  --md-primary: var(--md-primary-500);
+  --md-primary-foreground: #FFFFFF;
+  --md-primary-bg: rgba(59, 130, 246, 0.1);
+  --md-primary-border: rgba(59, 130, 246, 0.2);
+
+  /* ─── 主色旧命名（向后兼容） ─── */
+  --md-primary-hue-lighter: #93C5FD;
+  --md-primary-hue-light: #60A5FA;
+  --md-primary-hue-mid: #3B82F6;
+  --md-primary-hue-dark: #2563EB;
+  --md-primary-hue-darker: #1d4ed8;
+
+  --md-nav-item-selected: #3B82F6;
+  --md-nav-item-hover: #1E3A5F;
+  --md-nav-item-selected-hover: #2563EB;
+  --md-nav-item-selected-indicator: #3B82F6;
+
+  --md-primary-subtle-background: rgba(59, 130, 246, 0.1);
+  --md-primary-subtle-border: rgba(59, 130, 246, 0.2);
+
+  /* ─── 强调色（暖珊瑚） ─── */
+  --md-accent-text: #FB7185;
+  --md-accent-subtle-border: rgba(251, 113, 133, 0.2);
+
+  /* ─── 渐变色 ─── */
+  --md-accent-gradient-start: #60A5FA;
+  --md-accent-gradient-end: #3B82F6;
+  --md-accent-gradient: linear-gradient(90deg, #60A5FA 0%, #3B82F6 100%);
+
+  /* ─── 状态色（仪表盘） ─── */
+  --md-gauge-green: #4CAF50;
+  --md-gauge-yellow: #FFC107;
+  --md-gauge-red: #F4364C;
+  --md-danger: #E53935;
+  --md-error-text: #FB7185;
+
+  --md-success-subtle-background: rgba(76, 175, 80, 0.1);
+  --md-success-subtle-border: rgba(76, 175, 80, 0.3);
+  --md-warning-subtle-background: rgba(255, 193, 7, 0.1);
+  --md-warning-subtle-border: rgba(255, 193, 7, 0.3);
+  --md-danger-subtle-background: rgba(244, 54, 76, 0.1);
+  --md-danger-subtle-border: rgba(244, 54, 76, 0.3);
+
+  /* ─── 边框色 ─── */
+  --md-subtle-border: #334155;
+  --md-card-subtle-border: rgba(30, 41, 59, 0.2);
+  --md-swatch-hover-border: #FFFFFF;
+
+  /* ─── 纪念/金色主题 ─── */
+  --md-memorial-gold: #D4AF37;
+  --md-memorial-gold-soft: #C9A86C;
+  --md-memorial-gold-muted: #B8956A;
+  --md-memorial-gold-bg-start: #2D1F14;
+  --md-memorial-gold-bg-end: #3D2A1A;
+  --md-memorial-gold-glow: rgba(212, 175, 55, 0.15);
+  --md-memorial-gold-bg-soft: rgba(212, 175, 55, 0.2);
+
+  /* ─── 文字色 ─── */
+  --md-body: #E2E8F0;
+  --md-body-light: #94A3B8;
+  --md-body-lighter: #64748B;
+  --md-success-foreground: #7DD3FC;
+  --md-info-foreground: #94A3B8;
+  --md-white: #FFFFFF;
+
+  /* ─── 圆角体系（ColorOS 风格：层级越深圆角越小，整体无锐角） ─── */
+  --md-radius-small: 8px;
+  --md-radius: 12px;
+  --md-radius-large: 16px;
+  --md-radius-xl: 24px;       /* ColorOS 大容器 / Sheet / 全屏卡片 */
+  --md-radius-pill: 9999px;   /* ColorOS Pill 按钮 / Chip / 开关 */
+
+  /* ─── 间距体系 ─── */
+  --md-spacing-1: 4px;
+  --md-spacing-2: 8px;
+  --md-spacing-3: 12px;
+  --md-spacing-4: 16px;
+  --md-spacing-5: 20px;
+  --md-spacing-6: 24px;
+  --md-spacing-8: 32px;
+
+  /* ─── 字号体系 ─── */
+  --md-font-size-xs: 10px;
+  --md-font-size-sm: 11px;
+  --md-font-size-base: 13px;
+  --md-font-size-md: 14px;
+  --md-font-size-lg: 16px;
+  --md-font-size-xl: 20px;
+  --md-font-size-2xl: 28px;
+  --md-font-size-3xl: 40px;
+
+  /* ─── 字体 ─── */
+  --md-font-family: 'Segoe UI', 'Microsoft YaHei UI', '微软雅黑', system-ui, sans-serif;
+  --md-font-mono: 'Consolas', 'Courier New', monospace;
+
+  /* ─── 动画缓动（ColorOS 14 / Aquario 量子动画引擎风格） ─── */
+  /* 标准减速：初始微粘滞 → 快速收敛，模拟物理阻尼 */
+  --md-ease-standard: cubic-bezier(0.2, 0.9, 0.2, 1);
+  /* 强调减速：更明显的初始粘滞感 + 后期快速到位，ColorOS 标志性曲线 */
+  --md-ease-emphasized: cubic-bezier(0.15, 1, 0.3, 1);
+  /* 减速曲线：仅出向动画使用 */
+  --md-ease-standard-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  /* 加速曲线：仅入向动画使用 */
+  --md-ease-standard-accelerate: cubic-bezier(0.4, 0, 1, 1);
+  /* 弹簧回弹：按钮按压 / 卡片悬浮，模拟橡皮筋物理模型（过冲 12%） */
+  --md-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* 柔和弹簧：卡片进场 / 列表项揭示，轻微回弹不夸张（过冲 5%） */
+  --md-ease-spring-soft: cubic-bezier(0.22, 1.05, 0.36, 1);
+  /* Aquario 平滑减速（无过冲，量子引擎默认曲线，用于转场退场） */
+  --md-ease-aquario: cubic-bezier(0.16, 1, 0.3, 1);
+  /* 按下急停：按下瞬间反馈的快速阻尼曲线 */
+  --md-ease-snap: cubic-bezier(0.4, 0, 0.2, 1);
+  /* 阻尼振荡：侧栏滑入 / Sheet 弹出，带负值回弹 */
+  --md-ease-oscillate: cubic-bezier(0.68, -0.3, 0.32, 1.3);
+  /* 物理弹回：仅回弹动作（拖拽取消） */
+  --md-ease-bounce-back: cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  /* 图标 micro 动画（强过冲） */
+  --md-ease-pop: cubic-bezier(0.5, 1.6, 0.4, 0.85);
+  /* AOD 流动 / 长周期柔和（对称缓入缓出） */
+  --md-ease-drift: cubic-bezier(0.37, 0, 0.63, 1);
+
+  /* ─── 动画时长（ColorOS 分档：5 档细化） ─── */
+  --md-duration-instant: 80ms;    /* 状态切换即时反馈（ripple 起手、focus ring） */
+  --md-duration-fast: 150ms;      /* 微交互 hover 色阶 */
+  --md-duration-normal: 200ms;    /* 按钮 pressed 回弹、toggle */
+  --md-duration-medium: 280ms;    /* 卡片展开、tab 切换 */
+  --md-duration-slow: 350ms;      /* 卡片悬浮完整动画 */
+  --md-duration-elastic: 420ms;   /* 页面 push/pop、Dialog 入场 */
+  --md-duration-xlarge: 560ms;    /* shared element / hero */
+  --md-duration-cinema: 1200ms;   /* 启动动画 / 品牌动画 */
+
+  /* ─── 动画开关（1=启用, 0=禁用） ─── */
+  --md-enable-animations: 1;
+
+  /* ─── 阴影（ColorOS 风格：柔和长衰减 + 彩色 tinted shadow） ─── */
+  /* 暗色模式下阴影 alpha 整体降低，blur 远大于 offset 营造漂浮感 */
+  --md-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.18), 0 1px 3px rgba(0, 0, 0, 0.12);
+  --md-shadow-2: 0 2px 8px rgba(0, 0, 0, 0.22), 0 1px 2px rgba(0, 0, 0, 0.14);
+  --md-shadow-3: 0 6px 16px rgba(0, 0, 0, 0.28), 0 2px 6px rgba(0, 0, 0, 0.16);
+  --md-shadow-modal: 0 12px 32px rgba(0, 0, 0, 0.42), 0 4px 12px rgba(0, 0, 0, 0.22);
+  /* 彩色阴影：主色按钮 / 强调元素（ColorOS 14 标志性） */
+  --md-shadow-primary: 0 8px 20px -4px rgba(59, 130, 246, 0.55),
+                       0 4px 10px -2px rgba(59, 130, 246, 0.35);
+  --md-shadow-danger: 0 8px 20px -4px rgba(244, 54, 76, 0.55),
+                      0 4px 10px -2px rgba(244, 54, 76, 0.35);
+  /* 边缘内描边（暗色模式补层级，代替高对比阴影） */
+  --md-edge-hairline: 0 0 0 1px rgba(255, 255, 255, 0.04);
+
+  /* ─── 状态层（ColorOS 用纯色 alpha 叠加，不改变底色） ─── */
+  --md-state-hover: rgba(255, 255, 255, 0.06);      /* 暗色模式 hover 叠加白 */
+  --md-state-press: rgba(255, 255, 255, 0.10);      /* 暗色模式 pressed 叠加白 */
+  --md-state-focus: rgba(255, 255, 255, 0.08);      /* 暗色模式 focused 叠加白 */
+  --md-state-selected: rgba(59, 130, 246, 0.18);    /* 选中态主色叠加 */
+  --md-ring-focus: 0 0 0 2px rgba(59, 130, 246, 0.55); /* 焦点 ring */
+  --md-state-disabled-opacity: 0.38;                /* ColorOS 统一禁用透明度 */
+
+  /* ─── 转场专属（页面 push/pop 模糊消散） ─── */
+  --md-blur-exit: 12px;        /* 旧页模糊量 */
+  --md-scale-exit: 0.96;       /* 旧页缩放 */
+  --md-brightness-exit: 0.7;   /* 旧页亮度衰减 */
+  --md-opacity-exit: 0.6;      /* 旧页透明度 */
+
+  /* ─── ColorOS 辅助色（Aquamarine 绿，AOD 流动 / 强调辅色） ─── */
+  --md-aquamarine: #00C2A8;
+  --md-aquamarine-light: #4DE0CE;
+  --md-aquamarine-soft: rgba(0, 194, 168, 0.18);
+
+  /* ─── 模态/遮罩 ─── */
+  --md-modal-backdrop: rgba(0, 0, 0, 0.5);
+
+  /* ─── 侧边栏 ─── */
+  --sidebar-width-collapsed: 56px;
+  --sidebar-width-expanded: 240px;
+
+  /* ─── 状态栏 ─── */
+  --status-bar-height: 32px;
+
+  /* ─── 标题栏 ─── */
+  --title-bar-height: 40px;
+}

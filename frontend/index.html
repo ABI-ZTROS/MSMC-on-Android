@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MSMC - Minecraft Server Management Console</title>
+    <style>
+      /* 内联兜底样式：即使外部 CSS 加载失败，也保证深色背景，避免白屏 */
+      html, body { margin: 0; padding: 0; height: 100%; background-color: #0a0f1e; }
+      body { font-family: "Segoe UI", "Microsoft YaHei UI", system-ui, sans-serif; color: #e2e8f0; }
+      #root { height: 100%; }
+      /* 启动诊断层：React 渲染成功后 fade-out 淡出；失败时显示错误信息 */
+      #boot-diagnostics {
+        position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+        background-color: #0a0f1e; color: #e2e8f0; padding: 24px; z-index: 9999;
+        font-size: 13px; line-height: 1.6;
+        /* 过渡：避免 React 挂载前生硬移除，消除黑底→文字的僵硬切换感 */
+        transition: opacity 300ms cubic-bezier(0.33, 1, 0.68, 1),
+                    transform 300ms cubic-bezier(0.33, 1, 0.68, 1),
+                    filter 300ms cubic-bezier(0.33, 1, 0.68, 1);
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+      #boot-diagnostics.fade-out {
+        opacity: 0;
+        transform: translateY(-4px) scale(1.01);
+        filter: blur(8px);
+        pointer-events: none;
+      }
+      #boot-diagnostics .box { max-width: 680px; width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 24px; }
+      #boot-diagnostics h2 { margin: 0 0 8px; font-size: 16px; color: #f87171; }
+      #boot-diagnostics p { margin: 4px 0; color: #94a3b8; }
+      #boot-diagnostics .log { margin-top: 12px; padding: 12px; background: #020617; border-radius: 6px; font-family: Consolas, monospace; font-size: 12px; color: #cbd5e1; max-height: 320px; overflow: auto; white-space: pre-wrap; word-break: break-all; }
+      #boot-diagnostics .hint { margin-top: 12px; color: #64748b; font-size: 12px; }
+      #boot-diagnostics .ok { color: #4ade80; }
+      #boot-diagnostics .bad { color: #f87171; }
+      #boot-diagnostics .warn { color: #fbbf24; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- 启动诊断层：React 挂载前显示加载中，加载失败时显示错误 -->
+    <div id="boot-diagnostics">
+      <div class="box">
+        <h2>MSMC 前端启动中... (诊断模式)</h2>
+        <p>正在加载界面资源，请稍候。若失败，下方日志框会给出具体失败的文件。</p>
+        <div class="log" id="boot-log"></div>
+        <p class="hint">若长时间停留在此页面：① 看下方是否出现 <b style="color:#f87171">[SCRIPT-ERR]</b> / <b style="color:#fbbf24">[LOAD-ERR]</b>；② 把 <b style="color:#cbd5e1">boot-log 全部内容</b> 连同 <b style="color:#cbd5e1">mcserverguard-*.log</b> 一起给开发者排查。</p>
+      </div>
+    </div>
+
+    <script>
+      // ────────────────────────────────────────────────────────────────────────
+      // 【最早期诊断脚本】（注意：必须写在 Vite 注入的 <script type="module"> 之前）
+      // 目标：捕获到 ES Module 脚本加载失败 / 语法错误 这种 window.onerror 抓不到的场景
+      // 典型表现：NavigationCompleted 成功 + __msmcMainScriptLoaded 永远 false + 没有 ERROR 行
+      // ────────────────────────────────────────────────────────────────────────
+      (function () {
+        var bootLog = document.getElementById('boot-log');
+        function appendLog(msg, cls) {
+          if (!bootLog) return;
+          var tag = '[' + new Date().toLocaleTimeString() + '.' + String(new Date().getMilliseconds()).padStart(3, '0') + '] ';
+          var line = tag + msg + '\n';
+          var span = document.createElement('span');
+          if (cls) span.className = cls;
+          span.textContent = line;
+          bootLog.appendChild(span);
+          bootLog.scrollTop = bootLog.scrollHeight;
+        }
+
+        appendLog('[BOOT] 诊断脚本就绪 (增强版 v2)');
+        appendLog('[BOOT] location.href = ' + location.href);
+        appendLog('[BOOT] location.protocol = ' + location.protocol);
+        appendLog('[BOOT] UA = ' + navigator.userAgent);
+
+        // 尝试通过桥接 API 上报日志到 C#（Serilog）——失败静默
+        function reportToCsharp(level, message, stack) {
+          try {
+            if (window.__msmc_bridge__ && typeof window.__msmc_bridge__.invoke === 'function') {
+              window.__msmc_bridge__.invoke('log:write', {
+                level: level, message: message,
+                stack: stack || '', url: location.href, ua: navigator.userAgent
+              }).catch(function () {});
+            }
+          } catch (e) {}
+        }
+
+        window.__msmcBootErrors = [];
+
+        // ① window.onerror：抓全局同步错误 + 跨域 <script> 的简单错误
+        window.addEventListener('error', function (e) {
+          // ES Module <script> 的加载/解析错误：e.message 可能为空或 "Script error."，
+          // 但 e.target 会是那个 script/link 元素
+          var targetName = '';
+          if (e.target && e.target.tagName) {
+            var t = e.target;
+            if (t.tagName === 'SCRIPT') targetName = ' <script src="' + (t.src || '(inline)') + '">';
+            else if (t.tagName === 'LINK') targetName = ' <link href="' + (t.href || '(inline)') + '">';
+          }
+          var msg =
+            (e.message || '未知错误 / Script error.') +
+            (e.filename ? ' @ ' + e.filename + ':' + (e.lineno || 0) + ':' + (e.colno || 0) : '') +
+            targetName;
+          window.__msmcBootErrors.push(msg);
+          appendLog('[ERROR] ' + msg, 'bad');
+          reportToCsharp('Error', '[FE-ERR] ' + msg, e.error && e.error.stack);
+          // [WARN] ES Module 加载失败时 e.error 是 undefined；
+          // 所以不管有没有 e.error 都上报一次，至少能知道「哪个 URL 加载失败了」
+          if (targetName) {
+            reportToCsharp('Error', '[FE-ERR-2] 资源加载失败 target=' + targetName, '');
+          }
+        }, true /* ← 捕获阶段！script error 默认冒泡不到 window */);
+
+        // ② unhandledrejection：抓所有未处理 Promise（含动态 import() 懒加载失败）
+        window.addEventListener('unhandledrejection', function (e) {
+          var reason = e.reason;
+          var msg = (reason && (reason.message || reason.toString())) || '未处理的 Promise 拒绝';
+          // 动态 import() 懒加载失败时 reason 通常会带 "Failed to fetch dynamically imported module: xxx"
+          window.__msmcBootErrors.push(msg);
+          appendLog('[PROMISE] ' + msg, 'warn');
+          reportToCsharp('Error', '[FE-ERR] 未处理的 Promise 拒绝: ' + msg, reason && reason.stack);
+        });
+
+        // ③ 标记主入口是否真的跑到了 main.tsx 第 1 行
+        window.__msmcMainScriptLoaded = false;
+        // 以及 React 挂载是否真的完成
+        window.__msmcReactMounted = false;
+
+        // ④ 辅助：后续给 Vite 注入的 <script> 标签加 inline onerror/onload
+        //    （因为 <script type="module"> 的加载失败 error 事件即使捕获阶段也可能拿不到精确 URL）
+        function hookScriptError(el) {
+          if (!el || el.tagName !== 'SCRIPT') return;
+          var src = el.src || '(inline-module)';
+          el.addEventListener('error', function (ev) {
+            appendLog('[SCRIPT-LOAD-ERR] 加载失败 (error event): src=' + src, 'bad');
+            reportToCsharp('Error', '[FE-ERR-SCRIPT] <script> error event: ' + src, '');
+          });
+          el.addEventListener('load', function () {
+            appendLog('[SCRIPT-OK] <script> onload: ' + src, 'ok');
+          });
+        }
+
+        // DOMContentLoaded 后：① 给所有已经注入的 script/link 挂事件；② 3s 后 dump 全部资源加载状态
+        document.addEventListener('DOMContentLoaded', function () {
+          appendLog('[BOOT] DOMContentLoaded 触发');
+          // hook 现有 script
+          var scripts = document.querySelectorAll('script');
+          appendLog('[BOOT] 当前页面已有 <script> 数量: ' + scripts.length);
+          scripts.forEach(function (s, i) {
+            appendLog('[BOOT]   script[' + i + '] type=' + (s.type || '(none)') + ' src=' + (s.src || '(inline)'));
+            hookScriptError(s);
+          });
+          // hook 现有 link[rel=stylesheet] / link[rel=modulepreload]
+          var links = document.querySelectorAll('link');
+          appendLog('[BOOT] 当前页面已有 <link> 数量: ' + links.length);
+          links.forEach(function (l, i) {
+            appendLog('[BOOT]   link[' + i + '] rel=' + (l.rel || '(none)') + ' href=' + (l.href || '(none)'));
+          });
+
+          // 3 秒后用 Performance API 全量 dump 资源状态（成功/失败/耗时）
+          setTimeout(function () {
+            appendLog('[BOOT] ---------- 3s 资源加载快照 ----------');
+            try {
+              var entries = performance.getEntriesByType('resource');
+              var okCnt = 0, badCnt = 0;
+              entries.forEach(function (en) {
+                // initiatorType: script / link / css / fetch / img ...
+                var name = en.name || '(unknown)';
+                // 只打印看起来像本项目资源的（base 是相对路径，名字里有 dist/ 或 assets/）
+                if (name.indexOf('assets/') === -1 && name.indexOf('/dist/') === -1 && name.indexOf('file://') !== 0) return;
+                // 若被重定向或跨域，transferSize/decodedBodySize 可能为 0
+                var ok = true;
+                // 【宽容判定】只有当三个条件同时成立才判失败：
+                //   transferSize=0 + decodedBodySize=0 + duration<1ms
+                //   （这种情况通常代表请求根本没发出去或被内核拦截丢弃）
+                // 注意：204 No Content（如 favicon.ico）的 decodedBodySize=0 是合法的，不算失败
+                if (en.transferSize === 0 && en.decodedBodySize === 0 && en.duration < 1) ok = false;
+                // 如果浏览器支持 PerformanceResourceTiming.responseStatus（部分 WebView2 版本支持）
+                var status = '';
+                if (typeof en.responseStatus === 'number') {
+                  status = ' HTTP ' + en.responseStatus;
+                  // 【修复】204 No Content 是合法响应，不算失败（之前会把 favicon 误判）
+                  if (en.responseStatus >= 400 || en.responseStatus === 0) ok = false;
+                }
+                if (ok) okCnt++; else badCnt++;
+                // 【增强诊断】对 CSS 资源单独打印详细信息，方便定位样式丢失问题
+                var isCss = name.indexOf('.css') !== -1 || en.initiatorType === 'css';
+                var detail = '';
+                if (!ok || isCss) {
+                  detail = ' [ts=' + en.transferSize + ' dbs=' + en.decodedBodySize +
+                           ' dur=' + Math.round(en.duration) + ' init=' + en.initiatorType + ']';
+                }
+                appendLog(
+                  (ok ? '[RES-OK ] ' : '[RES-BAD] ') +
+                  '[' + en.initiatorType + '] ' +
+                  name.replace(/^.*[\\/]/, '') +   // 只显示文件名，太长
+                  ' (' + Math.round(en.duration) + 'ms' + status + ')' + detail,
+                  ok ? 'ok' : 'bad'
+                );
+              });
+              appendLog('[BOOT] 资源快照: 疑似成功=' + okCnt + ' 疑似失败=' + badCnt);
+              if (badCnt > 0) {
+                reportToCsharp('Warning', '[FE-ERR-3] 资源快照疑似失败数=' + badCnt, '');
+              }
+            } catch (perfEx) {
+              appendLog('[BOOT] Performance API 不可用: ' + perfEx.message);
+            }
+            appendLog('[BOOT] ---------- 快照结束 ----------');
+            // 再看一眼模块脚本执行没执行
+            if (!window.__msmcMainScriptLoaded) {
+              appendLog('[WARN] [WARN] 3 秒了 main.tsx 第 1 行还没执行！说明 <script type="module"> 要么没加载、要么 parse 失败', 'warn');
+              reportToCsharp('Warning', '[FE-BOOT] 3s snapshot: main.tsx 入口未执行 (script parse/load 大概率失败)', '');
+            } else if (!window.__msmcReactMounted) {
+              appendLog('[WARN] [WARN] main.tsx 已执行但 React 未挂载（App 里/懒加载 chunk 里抛错了）', 'warn');
+              reportToCsharp('Warning', '[FE-BOOT] 3s snapshot: main.tsx OK 但 React mount 未完成', '');
+            } else {
+              appendLog('[OK] [OK] main.tsx + React 挂载都完成', 'ok');
+            }
+          }, 3000);
+        });
+
+        // ⑤ 超时检测：12 秒（比之前 8 秒更宽容）
+        setTimeout(function () {
+          if (!window.__msmcMainScriptLoaded) {
+            appendLog('[WARN] [WARN] 12 秒后主入口脚本仍未完成加载 → 请把上面 [SCRIPT-ERR]/[RES-BAD] 内容连同 URL 发给开发者', 'warn');
+            reportToCsharp('Warning', '[FE-BOOT] 主入口脚本 12 秒内未完成加载', '');
+          }
+        }, 12000);
+      })();
+    </script>
+
+    <!-- [WARN] Vite 构建后会把下面这个 /src/main.tsx 替换成真正的 ./assets/main-xxxx.js
+         （base:'./' 已生效）我们加 inline onerror/onload 直接写在这里，
+         Vite 在 transformIndexHtml 时会保留属性 -->
+    <script
+      type="module"
+      src="/src/main.tsx"
+      onerror="(function(){try{var bl=document.getElementById('boot-log');if(bl){var line='[INLINE-SCRIPT-ERR] <script type=module src=/src/main.tsx> 触发 onerror (加载或 parse 失败)\\n';var span=document.createElement('span');span.className='bad';span.textContent=line;bl.appendChild(span);bl.scrollTop=bl.scrollHeight;}}catch(e){}})();"
+      onload="(function(){try{var bl=document.getElementById('boot-log');if(bl){var line='[INLINE-SCRIPT-OK] 主 <script type=module> 触发 onload\\n';var span=document.createElement('span');span.className='ok';span.textContent=line;bl.appendChild(span);bl.scrollTop=bl.scrollHeight;}}catch(e){}})();"
+    ></script>
+  </body>
+</html>
