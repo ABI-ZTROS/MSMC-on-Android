@@ -32,6 +32,7 @@ if [ "$SKIP_WEB" -eq 0 ]; then
   if [ -d "$ROOT/frontend" ] && [ -f "$ROOT/frontend/package.json" ]; then
     (cd "$ROOT/frontend" && npm install --no-audit --no-fund && npm run build)
     (cd "$ROOT/frontend" && rm -f dist/*.map 2>/dev/null || true)
+    rm -f "$ASSETS/www.zip"   # 旧占位/损坏 zip 会导致 zip -u 失败，先删再建
     (cd "$ROOT/frontend/dist" && zip -qr "$ASSETS/www.zip" .)
     log "前端已装配 → $(du -h "$ASSETS/www.zip" | cut -f1)"
   else
@@ -62,25 +63,59 @@ if [ "$BUILD_JDK" -eq 1 ]; then
   for major in 17 21 25 26; do
     OUT="$ASSETS/jdk$major.tar.gz"
     log "JDK $major"
-    FILENAME=$(awk -v p="^Package: openjdk-$major\$" '
+    # 从索引解析真实 Filename 与期望大小（用于校验截断下载）
+    INFO=$(awk -v p="^Package: openjdk-$major\$" '
       $0 ~ p {f=1}
-      f && /^Filename:/ {print $2; exit}' "$PKGS_FILE" 2>/dev/null || true)
+      f && /^Filename:/ {fn=$2}
+      f && /^Size:/ {sz=$2; exit}
+      END {print fn, sz}' "$PKGS_FILE" 2>/dev/null || true)
+    FILENAME=$(echo "$INFO" | awk '{print $1}')
+    EXPECTED_SIZE=$(echo "$INFO" | awk '{print $2}')
 
     if [ -z "$FILENAME" ]; then
       log "JDK $major 不在 Termux 仓库（或索引缺失），跳过（运行时 pkg install 兜底）"
       continue
     fi
 
-    if ! curl -sSLf --max-time 180 -o "$ROOT/.jdk/openjdk-$major.deb" \
-        "https://packages.termux.dev/apt/termux-main/$FILENAME"; then
-      log "JDK $major 下载失败，跳过（运行时兜底）"
+    if [ -n "$EXPECTED_SIZE" ]; then
+      log "期望大小 ${EXPECTED_SIZE}B"
+    fi
+
+    # 下载（必要时重试一次），并校验文件大小与索引一致，防截断
+    OK=0
+    for attempt in 1 2; do
+      if curl -sSLf --max-time 600 -o "$ROOT/.jdk/openjdk-$major.deb" \
+          "https://packages.termux.dev/apt/termux-main/$FILENAME"; then
+        ACTUAL=$(stat -c %s "$ROOT/.jdk/openjdk-$major.deb" 2>/dev/null || echo 0)
+        if [ -n "$EXPECTED_SIZE" ] && [ "$ACTUAL" != "$EXPECTED_SIZE" ]; then
+          log "JDK $major 下载不完整 ${ACTUAL}B != ${EXPECTED_SIZE}B（尝试 $attempt/2）"
+        else
+          OK=1
+          break
+        fi
+      else
+        log "JDK $major 下载失败（尝试 $attempt/2）"
+      fi
+    done
+    if [ "$OK" -ne 1 ]; then
+      rm -f "$ROOT/.jdk/openjdk-$major.deb"
+      log "JDK $major 下载未完成，跳过（运行时兜底）"
       continue
     fi
 
-    # 解包 .deb → 提取 usr/ → 打 tar.gz（布局 usr/lib/jvm/openjdk-N/…）
+    # 解包 .deb → 提取 usr/ → 打 tar.gz
     if dpkg-deb -x "$ROOT/.jdk/openjdk-$major.deb" "$ROOT/.jdk/x-$major" 2>/dev/null; then
       JVM_BASE="$ROOT/.jdk/x-$major/data/data/com.termux/files"
       if [ -d "$JVM_BASE/usr/lib/jvm" ]; then
+        # 统一规范布局 usr/lib/jvm/openjdk-N/：Termux 目录名是 java-N-openjdk，重命名对齐
+        for d in "$JVM_BASE"/usr/lib/jvm/*; do
+          [ -d "$d" ] || continue
+          base=$(basename "$d")
+          case "$base" in
+            "openjdk-$major") : ;;
+            "java-$major-openjdk"|"java-$major-jre"*) mv "$d" "$JVM_BASE/usr/lib/jvm/openjdk-$major" ;;
+          esac
+        done
         (cd "$JVM_BASE" && tar czf "$OUT" usr)
         log "JDK $major 已装配 → $(du -h "$OUT" | cut -f1)"
       else

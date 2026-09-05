@@ -22,6 +22,13 @@ jobs:
         with:
           node-version: '20'
 
+      # Android SDK 35.0.105 需要 JDK 21（runner 默认 JDK 17 会报 XA0030）
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -37,7 +44,17 @@ jobs:
           chmod +x scripts/assemble-assets.sh
           ./scripts/assemble-assets.sh --jdk
 
-      # 若配置了签名密钥则签名，否则用 debug 证书（不可分发）
+      # 未配置签名密钥时生成一个临时密钥（仅测试分发，不可上架）
+      - name: Ensure signing keystore
+        run: |
+          if [ ! -f msmc-release.keystore ]; then
+            keytool -genkeypair -v -keystore msmc-release.keystore \
+              -alias msmc -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass changeit -keypass changeit \
+              -dname "CN=MSMC on Android, OU=MSMC, O=ZTR-OS, L=Beijing, ST=Beijing, C=CN"
+          fi
+
+      # 若配置了签名密钥则签名，否则用上面的临时密钥（不可分发）
       - name: Build + sign internal APK
         run: dotnet build src/MSMC.Android/MSMC.Android.csproj -c Release -p:AppFlavor=internal -p:OutputPath=bin/Release/internal/ \
           -p:AndroidKeyStore=true \
@@ -45,6 +62,9 @@ jobs:
           -p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS || 'msmc' }} \
           -p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASS || 'changeit' }} \
           -p:AndroidSigningStorePass=${{ secrets.ANDROID_STORE_PASS || 'changeit' }}
+
+      - name: Clean obj (flavor-isolated asset packaging)
+        run: rm -rf src/MSMC.Android/obj src/MSMC.Shared/obj
 
       - name: Build + sign external APK
         run: dotnet build src/MSMC.Android/MSMC.Android.csproj -c Release -p:AppFlavor=external -p:OutputPath=bin/Release/external/ \

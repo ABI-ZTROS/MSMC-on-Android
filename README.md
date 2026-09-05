@@ -1,9 +1,9 @@
 # MSMC on Android 🐧📱
 
-Minecraft 服务器管理 · Android 版 —— **强制 root**，内置 Termux + JDK 17/21/25/26，
+Minecraft 服务器管理 · Android 版 —— **强制 root**，内置 Termux + JDK 17/21/25，
 无 GUI 管理页，内网网页面板 + 开服自动调起系统浏览器。
 
-- **internal（内置版）**：捆绑完整 Termux + 4 个 JDK + 前端，离线开箱即用（APK 大）
+- **internal（内置版）**：捆绑完整 Termux + JDK 17/21/25 + 前端，离线开箱即用（APK 大；JDK 26 视 Termux 仓库可用性走运行时兜底）
 - **external（非内置版）**：捆绑完整 Termux + 前端，JDK 检测已有 → 引导下载兜底（APK 小）
 
 架构与方案见设计文档（MSMC 仓库 docs/superpowers/specs/2026-09-05-msmc-on-android-design.md）。
@@ -41,7 +41,7 @@ docs/REAL_DEVICE_CHECKLIST.md  # 真机冒烟清单
 ## 本地构建
 
 ```bash
-# 需要 .NET 9 SDK + android workload + Android SDK + JDK 17+ + Node 20
+# 需要 .NET 9 SDK + android workload + Android SDK + JDK 21 + Node 20
 ./scripts/assemble-assets.sh --skip-web   # 或先手工构建前端再装配
 dotnet build src/MSMC.Android/MSMC.Android.csproj -c Release -p:AppFlavor=internal -p:AndroidKeyStore=false
 dotnet build src/MSMC.Android/MSMC.Android.csproj -c Release -p:AppFlavor=external -p:AndroidKeyStore=false

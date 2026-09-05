@@ -30,8 +30,20 @@ public sealed class JavaRuntimeManager
     /// <summary>获取 Termux 中的 Java 二进制路径（$PREFIX/bin/java 或 lib/jvm 下）</summary>
     public string DefaultJavaPath => Path.Combine(_termux.Prefix, "bin", "java");
 
-    /// <summary>某主版本的安装目录</summary>
-    public string JdkDir(int major) => Path.Combine(_termux.RootDir, JvmRelDir, $"openjdk-{major}");
+    /// <summary>某主版本的安装目录（兼容 Termux 的 java-N-openjdk 与规范的 openjdk-N）</summary>
+    public string JdkDir(int major)
+    {
+        var candidates = new[]
+        {
+            Path.Combine(_termux.RootDir, JvmRelDir, $"openjdk-{major}"),
+            Path.Combine(_termux.RootDir, JvmRelDir, $"java-{major}-openjdk"),
+        };
+        foreach (var c in candidates)
+        {
+            if (Directory.Exists(c)) return c;
+        }
+        return candidates[0];
+    }
 
     /// <summary>某主版本的 java 可执行路径</summary>
     public string JavaPath(int major) => Path.Combine(JdkDir(major), "bin", "java");
@@ -120,7 +132,9 @@ public sealed class JavaRuntimeManager
             foreach (var line in outStr.Split('\n'))
             {
                 var trimmed = line.Trim();
-                if (trimmed.Contains($"openjdk-{major}", StringComparison.Ordinal) && File.Exists(trimmed))
+                // 兼容 Termux 目录名 java-N-openjdk 与规范 openjdk-N
+                if ((trimmed.Contains($"openjdk-{major}", StringComparison.Ordinal) ||
+                     trimmed.Contains($"java-{major}-openjdk", StringComparison.Ordinal)) && File.Exists(trimmed))
                 {
                     return trimmed;
                 }
