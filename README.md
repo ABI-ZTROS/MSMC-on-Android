@@ -16,7 +16,7 @@ Minecraft 服务器管理 · Android 版 —— **强制 root**，内置 Termux 
 | M1 root+运行时 | ✅ | libsu 绑定 / RootService / TermuxRuntime / 4×JDK 管理 |
 | M2 核心开服 | ✅ | WebPanel（0.0.0.0+token）/ 多开监管 / 开服自动开浏览器 / 前台服务 |
 | M3 深化 | ✅ | 监控/性能/网络/调度/通知/市场/配置 全接通 |
-| M4 打磨 | 🟡 | 开机自启/保活/崩溃重启已实现；真机清单待跑；Release 流水线已配 |
+| M4 打磨 | 🟡 | 开机自启/保活/崩溃重启已实现；Release 流水线验证通过（v0.1.0 draft 含双 flavor 签名 APK）；仅剩真机冒烟 |
 
 ![CI](https://github.com/ABI-ZTROS/MSMC-on-Android/actions/workflows/ci.yml/badge.svg)
 
