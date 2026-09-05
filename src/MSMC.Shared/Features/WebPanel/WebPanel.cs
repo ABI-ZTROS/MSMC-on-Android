@@ -362,7 +362,8 @@ public sealed class WebPanel : IDisposable
 (function () {
   if (window.__msmcShimInjected) return;
   window.__msmcShimInjected = true;
-  var api = 'http://__HOST__:__PORT__';
+  // 用当前页面 origin —— 无论浏览器从局域网 IP 还是回环访问都正确
+  var api = window.location.origin;
   var token = '__TOKEN__';
   var handlers = [];
   function emit(msg) {
@@ -421,10 +422,7 @@ public sealed class WebPanel : IDisposable
 })();
 </script>
 ";
-        var host = "$HOST";
         var shim = shimTemplate
-            .Replace("__HOST__", host)
-            .Replace("__PORT__", Port.ToString())
             .Replace("__TOKEN__", Token);
 
         const string headTag = "<head>";
