@@ -45,9 +45,10 @@ fi
 # /bootstraps 目录已下线）。自动取最新 bootstrap tag，GitHub API 失败则用固定兜底 tag。
 log "下载 Termux bootstrap"
 BOOT_API="https://api.github.com/repos/termux/termux-packages/releases"
-# awk 命中后 exit 会提前关管道 → curl SIGPIPE(23)；|| true 防 set -e 终止
+# awk 命中后 exit 会提前关管道 → curl SIGPIPE(23)；|| true 防 set -e 终止。
+# tag_name 自带 "bootstrap-" 前缀，sub 去掉后由下方统一补回，避免双前缀。
 BOOT_TAG=$(curl -sSL --max-time 30 "$BOOT_API" 2>/dev/null \
-  | awk -F'"' '/"tag_name": "bootstrap-/ {print $4; exit}') || true
+  | awk -F'"' '/"tag_name": "bootstrap-/ {sub(/^bootstrap-/, "", $4); print $4; exit}') || true
 if [ -n "$BOOT_TAG" ]; then
   BOOT_TAG="bootstrap-$BOOT_TAG"
 else
