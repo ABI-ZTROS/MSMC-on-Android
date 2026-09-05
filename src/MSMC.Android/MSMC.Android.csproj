@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0-android</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>io.NET.ZTR_OS.Android</RootNamespace>
+    <AssemblyName>MSMC.Android</AssemblyName>
+    <ApplicationId>io.net.ztr_os.msmc</ApplicationId>
+    <ApplicationTitle>MSMC on Android</ApplicationTitle>
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
+    <RuntimeIdentifier>android-arm64</RuntimeIdentifier>
+    <AndroidSupportedAbis>arm64-v8a</AndroidSupportedAbis>
+
+    <!-- 双 flavor 占位：internal=捆绑 Termux+JDK（M1 起）；external=不捆绑 -->
+    <AppFlavor Condition="'$(AppFlavor)' == ''">internal</AppFlavor>
+    <DefineConstants Condition="'$(AppFlavor)' == 'external'">$(DefineConstants);MSMC_EXTERNAL</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../MSMC.Shared/MSMC.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="4.*" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.*" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="8.*" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.*" />
+  </ItemGroup>
+</Project>
