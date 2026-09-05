@@ -37,9 +37,12 @@ jobs:
           chmod +x scripts/assemble-assets.sh
           ./scripts/assemble-assets.sh --jdk
 
-      # 两个 flavor 产物同名，用独立 OutputPath 隔离，避免互相覆盖
+      # 两个 flavor 产物同名，用独立 OutputPath 隔离；构建间清 obj 防止资产打包缓存串味
       - name: Build internal APK
         run: dotnet build src/MSMC.Android/MSMC.Android.csproj -c Release -p:AppFlavor=internal -p:AndroidKeyStore=false -p:OutputPath=bin/Release/internal/
+
+      - name: Clean obj (flavor-isolated asset packaging)
+        run: rm -rf src/MSMC.Android/obj src/MSMC.Shared/obj
 
       - name: Build external APK
         run: dotnet build src/MSMC.Android/MSMC.Android.csproj -c Release -p:AppFlavor=external -p:AndroidKeyStore=false -p:OutputPath=bin/Release/external/
