@@ -15,12 +15,10 @@ public class MainActivity : Activity
     protected override void OnCreate(Bundle? savedInstanceState)
     {
         base.OnCreate(savedInstanceState);
-        SetTheme(Android.Resource.Style.ThemeDeviceDefaultDark);
 
         var layout = new LinearLayout(this)
         {
             Orientation = Orientation.Vertical,
-            Gravity = GravityFlags.Center,
         };
         layout.SetPadding(48, 48, 48, 48);
 
@@ -30,21 +28,22 @@ public class MainActivity : Activity
             TextSize = 24f,
             Gravity = GravityFlags.Center,
         };
+        var pid = global::Android.OS.Process.MyPid();
         var status = new TextView(this)
         {
             Text = $"Flavor: {(IsExternal ? "external（非内置版）" : "internal（内置版）")}\n"
-                 + $"Pid: {Android.OS.Process.MyPid()}",
+                 + $"Pid: {pid}",
             TextSize = 15f,
             Gravity = GravityFlags.Center,
         };
-        status.SetTextColor(Android.Graphics.Color.Gray);
+        status.SetTextColor(global::Android.Graphics.Color.Gray);
         var hint = new TextView(this)
         {
             Text = "M0 骨架 · 网页面板与开服能力将在后续里程碑上线（M2）。",
             TextSize = 13f,
             Gravity = GravityFlags.Center,
         };
-        hint.SetTextColor(Android.Graphics.Color.Gray);
+        hint.SetTextColor(global::Android.Graphics.Color.Gray);
 
         layout.AddView(title);
         layout.AddView(status);

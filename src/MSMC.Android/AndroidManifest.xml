@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-  <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="34" />
-  <application android:label="MSMC on Android" android:allowBackup="false">
+  <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="35" />
+  <application android:label="MSMC on Android" android:allowBackup="false" android:theme="@style/AppTheme">
     <activity android:name=".MainActivity" android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />

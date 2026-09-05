@@ -9,8 +9,8 @@
     <ApplicationId>io.net.ztr_os.msmc</ApplicationId>
     <ApplicationTitle>MSMC on Android</ApplicationTitle>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
-    <RuntimeIdentifier>android-arm64</RuntimeIdentifier>
-    <AndroidSupportedAbis>arm64-v8a</AndroidSupportedAbis>
+    <RuntimeIdentifiers>android-arm64</RuntimeIdentifiers>
+    <SupportedOSPlatformVersion>26</SupportedOSPlatformVersion>
 
     <!-- 双 flavor 占位：internal=捆绑 Termux+JDK（M1 起）；external=不捆绑 -->
     <AppFlavor Condition="'$(AppFlavor)' == ''">internal</AppFlavor>

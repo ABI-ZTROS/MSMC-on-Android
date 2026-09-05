@@ -12,7 +12,7 @@ public class App : Application
 {
     internal const string Tag = "MSMC.Android";
 
-    public App(IntPtr handle, Android.Runtime.JniHandleOwnership transfer)
+    public App(IntPtr handle, global::Android.Runtime.JniHandleOwnership transfer)
         : base(handle, transfer)
     {
     }
@@ -21,7 +21,7 @@ public class App : Application
     {
         base.OnCreate();
 
-        var logDir = Path.Combine(GetFilesDir()?.AbsolutePath ?? "/data/user/0/io.net.ztr_os.msmc/files", "logs");
+        var logDir = Path.Combine(FilesDir?.AbsolutePath ?? "/data/user/0/io.net.ztr_os.msmc/files", "logs");
         Directory.CreateDirectory(logDir);
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
