@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build internal + external APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools: latest
+          platforms: 'android-34'
+          build-tools: '34.0.0'
+
+      - name: Install android workload
+        run: dotnet workload install android
+
+      # 两个 flavor 产物同名，用独立的 OutputPath / BaseIntermediateOutputPath 隔离，避免互相覆盖
+      - name: Build internal APK
+        run: dotnet build src/MSMC.Android/MSMC.Android.csproj -c Release -p:AppFlavor=internal -p:AndroidKeyStore=false -p:OutputPath=bin/Release/internal/ -p:BaseIntermediateOutputPath=obj/internal/
+
+      - name: Build external APK
+        run: dotnet build src/MSMC.Android/MSMC.Android.csproj -c Release -p:AppFlavor=external -p:AndroidKeyStore=false -p:OutputPath=bin/Release/external/ -p:BaseIntermediateOutputPath=obj/external/
+
+      - name: Upload internal APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: msmc-android-internal
+          path: src/MSMC.Android/bin/Release/internal/*.apk
+          if-no-files-found: error
+
+      - name: Upload external APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: msmc-android-external
+          path: src/MSMC.Android/bin/Release/external/*.apk
+          if-no-files-found: error
