@@ -70,11 +70,17 @@ jobs:
       - name: Build + sign external APK
         run: dotnet build src/MSMC.Android/MSMC.Android.csproj -c Release -p:AppFlavor=external -p:OutputPath=bin/Release/external/ -p:AndroidKeyStore=true -p:AndroidSigningKeyStore=msmc-release.keystore -p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS || 'msmc' }} -p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASS || 'changeit' }} -p:AndroidSigningStorePass=${{ secrets.ANDROID_STORE_PASS || 'changeit' }}
 
+      # 两个 flavor 产物同名（io.net.ztr_os.msmc-Signed.apk），上传前按 flavor 重命名防覆盖
+      - name: Rename APKs per flavor
+        run: |
+          mv src/MSMC.Android/bin/Release/internal/*-Signed.apk msmc-android-internal.apk
+          mv src/MSMC.Android/bin/Release/external/*-Signed.apk msmc-android-external.apk
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            src/MSMC.Android/bin/Release/internal/*-Signed.apk
-            src/MSMC.Android/bin/Release/external/*-Signed.apk
+            msmc-android-internal.apk
+            msmc-android-external.apk
           generate_release_notes: true
           draft: true
