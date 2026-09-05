@@ -41,9 +41,21 @@ if [ "$SKIP_WEB" -eq 0 ]; then
 fi
 
 # ── 2. Termux bootstrap（internal/external 均捆绑完整 Termux）──────────
+# 官方 bootstrap 托管在 termux-packages 的 GitHub Releases（packages.termux.dev 的
+# /bootstraps 目录已下线）。自动取最新 bootstrap tag，GitHub API 失败则用固定兜底 tag。
 log "下载 Termux bootstrap"
-BOOT_URL="https://packages.termux.dev/apt/termux-main/bootstraps/bootstrap-aarch64.zip"
-if curl -sSLf --max-time 300 -o "$ASSETS/termux-bootstrap.zip" "$BOOT_URL"; then
+BOOT_API="https://api.github.com/repos/termux/termux-packages/releases"
+BOOT_TAG=$(curl -sSL --max-time 30 "$BOOT_API" 2>/dev/null \
+  | awk -F'"' '/"tag_name": "bootstrap-/ {print $4; exit}')
+if [ -n "$BOOT_TAG" ]; then
+  BOOT_TAG="bootstrap-$BOOT_TAG"
+else
+  log "GitHub API 失败，用固定兜底 tag"
+  BOOT_TAG="bootstrap-2026.08.30-r1+apt.android-7"
+fi
+BOOT_URL="https://github.com/termux/termux-packages/releases/download/${BOOT_TAG}/bootstrap-aarch64.zip"
+log "bootstrap 源: ${BOOT_TAG}"
+if curl -sSLfL --max-time 900 -o "$ASSETS/termux-bootstrap.zip" "$BOOT_URL"; then
   log "Termux 已装配 → $(du -h "$ASSETS/termux-bootstrap.zip" | cut -f1)"
 else
   log "Termux 下载失败（运行时将尝试在线兜底）"
