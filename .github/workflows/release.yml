@@ -44,35 +44,27 @@ jobs:
           chmod +x scripts/assemble-assets.sh
           ./scripts/assemble-assets.sh --jdk
 
-      # 未配置签名密钥时生成一个临时密钥（仅测试分发，不可上架）
+      # 未配置签名密钥时生成一个临时密钥（仅测试分发，不可上架）。
+      # 放项目目录下：-p:AndroidSigningKeyStore 相对路径按项目目录解析。
       - name: Ensure signing keystore
         run: |
-          if [ ! -f msmc-release.keystore ]; then
-            keytool -genkeypair -v -keystore msmc-release.keystore \
+          if [ ! -f src/MSMC.Android/msmc-release.keystore ]; then
+            keytool -genkeypair -v -keystore src/MSMC.Android/msmc-release.keystore \
               -alias msmc -keyalg RSA -keysize 2048 -validity 10000 \
               -storepass changeit -keypass changeit \
               -dname "CN=MSMC on Android, OU=MSMC, O=ZTR-OS, L=Beijing, ST=Beijing, C=CN"
           fi
 
       # 若配置了签名密钥则签名，否则用上面的临时密钥（不可分发）
+      # 注意：命令保持单行（多行 + 反斜杠续接会被 YAML 折叠成字面量导致 MSB1008）
       - name: Build + sign internal APK
-        run: dotnet build src/MSMC.Android/MSMC.Android.csproj -c Release -p:AppFlavor=internal -p:OutputPath=bin/Release/internal/ \
-          -p:AndroidKeyStore=true \
-          -p:AndroidSigningKeyStore=msmc-release.keystore \
-          -p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS || 'msmc' }} \
-          -p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASS || 'changeit' }} \
-          -p:AndroidSigningStorePass=${{ secrets.ANDROID_STORE_PASS || 'changeit' }}
+        run: dotnet build src/MSMC.Android/MSMC.Android.csproj -c Release -p:AppFlavor=internal -p:OutputPath=bin/Release/internal/ -p:AndroidKeyStore=true -p:AndroidSigningKeyStore=msmc-release.keystore -p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS || 'msmc' }} -p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASS || 'changeit' }} -p:AndroidSigningStorePass=${{ secrets.ANDROID_STORE_PASS || 'changeit' }}
 
       - name: Clean obj (flavor-isolated asset packaging)
         run: rm -rf src/MSMC.Android/obj src/MSMC.Shared/obj
 
       - name: Build + sign external APK
-        run: dotnet build src/MSMC.Android/MSMC.Android.csproj -c Release -p:AppFlavor=external -p:OutputPath=bin/Release/external/ \
-          -p:AndroidKeyStore=true \
-          -p:AndroidSigningKeyStore=msmc-release.keystore \
-          -p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS || 'msmc' }} \
-          -p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASS || 'changeit' }} \
-          -p:AndroidSigningStorePass=${{ secrets.ANDROID_STORE_PASS || 'changeit' }}
+        run: dotnet build src/MSMC.Android/MSMC.Android.csproj -c Release -p:AppFlavor=external -p:OutputPath=bin/Release/external/ -p:AndroidKeyStore=true -p:AndroidSigningKeyStore=msmc-release.keystore -p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS || 'msmc' }} -p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASS || 'changeit' }} -p:AndroidSigningStorePass=${{ secrets.ANDROID_STORE_PASS || 'changeit' }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
