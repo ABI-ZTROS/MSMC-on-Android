@@ -10,7 +10,9 @@ Minecraft 服务器管理 · Android 版 —— **强制 root**，内置 Termux 
 
 ## 状态
 
-🟡 M0 骨架 —— 最小 APK 可构建（无管理功能）
+✅ M0 完成 —— 最小 APK 可构建，CI 产出 internal/external 双 APK（无管理功能）
+
+![CI](https://github.com/ABI-ZTROS/MSMC-on-Android/actions/workflows/ci.yml/badge.svg)
 
 ## 目录结构
 
