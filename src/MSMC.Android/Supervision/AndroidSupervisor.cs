@@ -70,8 +70,8 @@ public sealed class AndroidSupervisor : IDisposable
         // eula 自动同意（设计：MSMC 代玩家同意，可后续做开关）
         EnsureEula(fullWorkDir);
 
-        // setsid 启动：进程组独立，避免随 App 进程组被杀
-        var cmd = BuildLaunchCommand(fullWorkDir, javaPath, launchArgs, affinityMask);
+        // 写启动脚本（避免嵌套引号地狱），然后 setsid 独立进程组拉起
+        var (cmd, launchLogFile) = await Task.Run(() => WriteAndGetLaunchCommand(fullWorkDir, javaPath, launchArgs, affinityMask));
         Log.Information("[SUP] 启动命令 Dir={Dir} Cmd={Cmd}", fullWorkDir, cmd);
 
         var (outStr, errStr, code) = await Task.Run(() => RunRootCapture(cmd));
@@ -95,7 +95,7 @@ public sealed class AndroidSupervisor : IDisposable
             WorkDirectory = fullWorkDir,
             JavaPath = javaPath,
             LaunchArgs = launchArgs,
-            LogFile = Path.Combine(GetLogsDir(fullWorkDir), $"server-{DateTime.Now:yyyyMMdd-HHmmss}.log"),
+            LogFile = launchLogFile,
             StartedAt = DateTimeOffset.UtcNow,
             MonitorToken = new CancellationTokenSource(),
         };
@@ -107,16 +107,26 @@ public sealed class AndroidSupervisor : IDisposable
         return ServerLaunchResult.Ok(pid, $"服务器已启动（PID {pid}）");
     }
 
-    /// <summary>构造 setsid 启动命令（env -i 注入 Termux 环境，nohup 防挂断）</summary>
-    private string BuildLaunchCommand(string dir, string javaPath, string args, long affinityMask)
+    /// <summary>写启动脚本到日志目录并返回 (拉起命令, 日志文件路径)</summary>
+    private (string Cmd, string LogFile) WriteAndGetLaunchCommand(string dir, string javaPath, string args, long affinityMask)
     {
+        var logDir = GetLogsDir(dir);
+        var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+        var logFile = Path.Combine(logDir, $"server-{stamp}.log");
+        var scriptPath = Path.Combine(logDir, $"launch-{stamp}.sh");
+
+        var affinity = affinityMask > 0 ? $"taskset -p {affinityMask} $$ >/dev/null 2>&1\n" : string.Empty;
+        var script =
+            "#!/bin/sh\n"
+            + $"cd '{dir}'\n"
+            + affinity
+            + $"exec \"{javaPath}\" {args} > '{logFile}' 2>&1\n";
+
+        File.WriteAllText(scriptPath, script);
+        Root.RootService.FileOp("chmod", $"+x '{scriptPath}'");
+
         var env = string.Join(' ', _termux.EnvVars().Select(kv => $"{kv.Key}={kv.Value}"));
-        var cd = $"cd '{dir}'";
-        var affinity = affinityMask > 0
-            ? $"taskset -p {affinityMask} $$ >/dev/null 2>&1; "
-            : string.Empty;
-        var cmd = $"{env} sh -c '{affinity}exec setsid nohup \"{javaPath}\" {args} > '{GetLogsDir(dir)}/server-{DateTime.Now:yyyyMMdd-HHmmss}.log' 2>&1 &'";
-        return cmd;
+        return ($"{env} setsid nohup '{scriptPath}' >/dev/null 2>&1 &", logFile);
     }
 
     private static string GetLogsDir(string dir)
