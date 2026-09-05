@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    MSMC.Libsu —— topjohnwu/libsu 6.0.0 的 .NET for Android 绑定库
+    仅绑定 core 模块（Shell 命令流 / root 探测 / 后台执行）。
+    nio/io 模块的 Kotlin 抽象继承链与 class-parse 生成的 C# 不兼容
+    （ExtendedFile 抽象成员会被字节码自动补回，无法用 Metadata 摘除），
+    SuFile 便利 IO 以 Shell.Cmd 脚本化等价替代，功能不受损。
+    （core 内部已内置 busybox 管理，busybox 能力可用）
+  -->
+  <PropertyGroup>
+    <TargetFramework>net9.0-android</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>MSMC.Libsu</RootNamespace>
+    <AssemblyName>MSMC.Libsu</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AndroidLibrary Include="libs/libsu-core.aar" />
+  </ItemGroup>
+</Project>

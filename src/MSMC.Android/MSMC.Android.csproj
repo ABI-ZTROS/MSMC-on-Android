@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../MSMC.Shared/MSMC.Shared.csproj" />
+    <ProjectReference Include="../MSMC.Libsu/MSMC.Libsu.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,5 +27,19 @@
     <PackageReference Include="Serilog.Sinks.File" Version="6.*" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="8.*" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.*" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.*" />
+    <PackageReference Include="SharpCompress" Version="0.38.*" />
+  </ItemGroup>
+
+  <!-- 内置 Termux bootstrap（CI 装配，可缺省 → 运行时下载兜底） -->
+  <ItemGroup>
+    <AndroidAsset Condition="Exists('Assets/termux-bootstrap.zip')" Include="Assets/termux-bootstrap.zip" />
+    <!-- 内置 4×JDK（仅 internal flavor，CI 装配） -->
+    <AndroidAsset Condition="Exists('Assets/jdk17.tar.gz')" Include="Assets/jdk17.tar.gz" />
+    <AndroidAsset Condition="Exists('Assets/jdk21.tar.gz')" Include="Assets/jdk21.tar.gz" />
+    <AndroidAsset Condition="Exists('Assets/jdk25.tar.gz')" Include="Assets/jdk25.tar.gz" />
+    <AndroidAsset Condition="Exists('Assets/jdk26.tar.gz')" Include="Assets/jdk26.tar.gz" />
+    <!-- 内置前端 dist（CI 装配） -->
+    <AndroidAsset Condition="Exists('Assets/www.zip')" Include="Assets/www.zip" />
   </ItemGroup>
 </Project>

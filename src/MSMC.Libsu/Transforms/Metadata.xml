@@ -1,0 +1,20 @@
+<metadata>
+  <!--
+    绑定修正：libsu 用 Kotlin 泛型与重载花活，class-parse 生成的 C# 有少量
+    编不过的成员。按需精确摘除 —— 被摘除的都是非核心便利 API，
+    MSMC 只用 Shell 命令流 + SuFile 基础 IO，不影响功能。
+  -->
+
+  <!-- CallbackList：内部回调排序容器，MSMC 不需要 -->
+  <remove-node path="/api/package[@name='com.topjohnwu.superuser']/class[@name='CallbackList']" />
+
+  <!-- SuRandomAccessFile：随机访问文件流，MSMC 不需要（返回类型绑定冲突） -->
+  <remove-node path="/api/package[@name='com.topjohnwu.superuser.io']/class[@name='SuRandomAccessFile']" />
+
+  <!-- nio.ExtendedFile：ListFiles/GetChildFile 重载与 io.SuFile 互相遮蔽，全摘；SuFile 自带同名实现 -->
+  <remove-node path="/api/package[@name='com.topjohnwu.superuser.nio']/class[@name='ExtendedFile']/method[@name='ListFiles']" />
+  <remove-node path="/api/package[@name='com.topjohnwu.superuser.nio']/class[@name='ExtendedFile']/method[@name='GetChildFile']" />
+
+  <!-- ExtendedFile 的 Comparable 泛型桥方法绑定冲突，摘掉 compareTo -->
+  <remove-node path="/api/package[@name='com.topjohnwu.superuser.nio']/class[@name='ExtendedFile']/method[@name='compareTo']" />
+</metadata>
